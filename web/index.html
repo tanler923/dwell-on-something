@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-<meta name="theme-color" content="#faf9f5" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#262624" media="(prefers-color-scheme: dark)">
-<title>Claude</title>
+<meta name="theme-color" content="#f7f9fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#20242a" media="(prefers-color-scheme: dark)">
+<title>我们的小家</title>
 
 <link rel="icon" href="icons/favicon-64.png" sizes="64x64" type="image/png">
 <link rel="icon" href="icons/favicon.ico" sizes="any">
@@ -14,13 +14,13 @@
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Claude">
+<meta name="apple-mobile-web-app-title" content="我们的小家">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <script>
 /* 夜间模式：跟随系统 / 常亮 / 常暗，三态轮换，记在本地。
    写在 <style> 前面执行，页面还没画就把皮穿好，不会闪一下白的。
    规矩：反转的只有底色、卡片、线、字这些"纸和墨"；
-   本家橘、身体粉这种有身份的颜色两种模式下都不动——它们是记号，不是背景。 */
+   本家蓝、身体粉这种有身份的颜色两种模式下都不动——它们是记号，不是背景。 */
 (function () {
   try {
     var t = localStorage.getItem('homeTheme') || 'auto';
@@ -30,42 +30,42 @@
 </script>
 <style>
   :root {
-    --bg: #faf9f5;
+    --bg: #f7f9fb;
     --card: #ffffff;
-    --panel: #f0eee6;
-    --line: #e8e5dc;
-    --text: #2b2a27;
-    --dim: #8a867c;
-    --accent: #c96442;        
-    --accent-soft: #d97757;
-    --user-bubble: #f0eee6;
-    --sage: #96B08F;          
-    --sage-track: #E7EDE2;
+    --panel: #eaeff4;
+    --line: #e1e7ee;
+    --text: #262b31;
+    --dim: #7d8793;
+    --accent: #5f87ad;        
+    --accent-soft: #7fa3c7;
+    --user-bubble: #eaeff4;
+    --sage: #8db3cc;          
+    --sage-track: #dce8f2;
     --pink-track: #F8E5DE;
     --green: #2e7d43;
     --red: #c0392b;
     --amber: #e3a13a;         
     --amber-track: #f5e6c8;
     --red-track: #f6d8d4;
-    --overlay: rgba(40, 38, 34, .4);
+    --overlay: rgba(30, 36, 44, .4);
     --serif: SerifNum, "Songti SC", "Noto Serif SC", Georgia, serif;
     --glass: color-mix(in srgb, var(--card) 70%, transparent);  /* 悬浮层玻璃度（顶栏/菜单——内容条 8/3 改用 --panel 实色） */
     --pink: #E5A192;          
   }
   @media (prefers-color-scheme: dark) {
 html:not([data-theme="light"]) {
-      --bg: #262624; --card: #30302e; --panel: #383836; --line: #3d3d3a;
-      --text: #f5f4ef; --dim: #a3a099; --user-bubble: #35353260;
-      --sage: #A8C0A0; --sage-track: #3A423A; --pink-track: #4A3B34;
+      --bg: #20242a; --card: #2a2f36; --panel: #323840; --line: #3a4048;
+      --text: #eef2f6; --dim: #9aa4b0; --user-bubble: #353b4460;
+      --sage: #9dbbd2; --sage-track: #2c3a48; --pink-track: #4A3B34;
       --green: #6fbf85; --red: #e07a6a;
       --amber: #e8b45c; --amber-track: #4a4232; --red-track: #4d3a36;
       --overlay: rgba(0, 0, 0, .55);
     }
 }
 html[data-theme="dark"] {
-      --bg: #262624; --card: #30302e; --panel: #383836; --line: #3d3d3a;
-      --text: #f5f4ef; --dim: #a3a099; --user-bubble: #35353260;
-      --sage: #A8C0A0; --sage-track: #3A423A; --pink-track: #4A3B34;
+      --bg: #20242a; --card: #2a2f36; --panel: #323840; --line: #3a4048;
+      --text: #eef2f6; --dim: #9aa4b0; --user-bubble: #353b4460;
+      --sage: #9dbbd2; --sage-track: #2c3a48; --pink-track: #4A3B34;
       --green: #6fbf85; --red: #e07a6a;
       --amber: #e8b45c; --amber-track: #4a4232; --red-track: #4d3a36;
       --overlay: rgba(0, 0, 0, .55);
@@ -515,7 +515,7 @@ html[data-theme="dark"] .composer {
   .freshtip { text-align: center; font-size: 13px; color: var(--dim); padding: 34px 30px; line-height: 1.8; }
   
   #gongSheet .sheet { height: 100dvh; max-height: 100dvh; border-radius: 0; }
-  /* 换行，不然他的思维链会被挤成气泡旁边一条窄柱（8/3 截图当场看出来的） */
+  /* 换行，不然她的思维链会被挤成气泡旁边一条窄柱（8/3 截图当场看出来的） */
   
   #gongBody { display: flex; flex-direction: column; gap: 18px; }
   #gongBody .gu, #gongBody .bubble { font-size: 15.5px; line-height: 1.75; }
@@ -603,11 +603,11 @@ html[data-theme="dark"] .composer {
   .urow-top .un { font-size: 17px; font-weight: 600; }
   .urow-top .up { font-size: 15px; color: var(--dim); }
   .ubar {
-    height: 8px; border-radius: 999px; background: var(--amber-track);
+    height: 8px; border-radius: 999px; background: var(--sage-track);
     margin: 12px 0 10px; overflow: hidden;
   }
   
-  .ubar > i { display: block; height: 100%; border-radius: 999px; background: var(--amber); transition: width .4s, background .3s; }
+  .ubar > i { display: block; height: 100%; border-radius: 999px; background: var(--accent-soft); transition: width .4s, background .3s; }
   .ubar.warn { background: var(--amber-track); }
   .ubar.warn > i { background: var(--amber); }
   .ubar.hot { background: var(--red-track); }
@@ -702,7 +702,7 @@ html[data-theme="dark"] .composer {
   .fd-hit .fh { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--dim); margin-bottom: 4px; }
   .fd-hit .fk { background: var(--panel); border-radius: 999px; padding: 1px 9px; }
   .fd-hit .fs { font-size: 14.5px; line-height: 1.7; word-break: break-word; }
-  .fd-hit .fs mark { background: rgba(217, 119, 87, .28); color: inherit; border-radius: 3px; padding: 0 2px; }
+  .fd-hit .fs mark { background: rgba(127, 163, 199, .28); color: inherit; border-radius: 3px; padding: 0 2px; }
 
   .cal-head { position: relative; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 2px 0 14px; }
   .cal-head .cm { font-size: 18px; font-weight: 600; min-width: 145px; text-align: center; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
@@ -734,7 +734,7 @@ html[data-theme="dark"] .composer {
   
   .cal-day.sel .dnum { background: color-mix(in srgb, var(--dim) 30%, transparent); }
   
-  .cal-day.today .dnum { background: var(--accent); color: #fff; }  /* 今天=这一屏唯一的一粒橘 */
+  .cal-day.today .dnum { background: var(--accent); color: #fff; }  /* 今天=这一屏唯一的一粒蓝 */
   .cal-day .dnum, .cal-day .dots { position: relative; z-index: 1; }
   .cal-day .dots { display: flex; gap: 3px; height: 4px; margin-top: 3px; }
   .cal-day .dots i { width: 4px; height: 4px; border-radius: 50%; }
@@ -831,11 +831,11 @@ html[data-theme="dark"] .composer {
   @keyframes bdBreath { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.14); } }
   
   @media (prefers-color-scheme: dark) {
-    html:not([data-theme="light"]) .bd-nums .xc-row .xc-fill.lv0 { background: #55554F; }
-    html:not([data-theme="light"]) .bd-nums .xc-row .xc-fill.lv1 { background: #6A6963; }
-    html:not([data-theme="light"]) .bd-nums .xc-row .xc-fill.lv2 { background: #8F8E88; }
-    html:not([data-theme="light"]) .bd-nums .xc-row .xc-fill.lv3 { background: #B3B0A4; }
-    html:not([data-theme="light"]) .bd-nums .xc-row .xc-fill.lv4 { background: #DCDAD2; }
+    html:not([data-theme="light"]) .bd-nums .xc-row .xc-fill.lv0 { background: #4F555D; }
+    html:not([data-theme="light"]) .bd-nums .xc-row .xc-fill.lv1 { background: #656C75; }
+    html:not([data-theme="light"]) .bd-nums .xc-row .xc-fill.lv2 { background: #8A919A; }
+    html:not([data-theme="light"]) .bd-nums .xc-row .xc-fill.lv3 { background: #AFB5BD; }
+    html:not([data-theme="light"]) .bd-nums .xc-row .xc-fill.lv4 { background: #D5DAE0; }
     html:not([data-theme="light"]) .bd-nums .xc-row .xc-fill.lv5 { background: var(--text); }
   }
   
@@ -926,7 +926,7 @@ html[data-theme="dark"] .composer {
     font-size: 11.5px; line-height: 1.65; white-space: pre; }
 
   /* 点哪一行，下面那条线就换成哪一项。选中的那行左边立一道竖杠——
-     不加颜色、不加底色（本家橘一屏最好为零，这里一点都不该用） */
+     不加颜色、不加底色（本家蓝一屏最好为零，这里一点都不该用） */
   
   @keyframes bdDraw { to { stroke-dashoffset: 0; } }
   /* 「做完了」那一刀 */
@@ -1333,7 +1333,7 @@ html[data-theme="dark"] .note { color: #2f2b26; box-shadow: 0 3px 12px rgba(0,0,
   .gnote { position: relative; background: var(--panel); border-radius: 14px;
     padding: 12px 14px 13px 18px; margin: 12px 0 18px; }
   .gnote::before { content: ''; position: absolute; left: 9px; top: 14px; bottom: 14px;
-    width: 3px; border-radius: 999px; background: var(--amber); }
+    width: 3px; border-radius: 999px; background: var(--accent-soft); }
   .gnote .lb { font-size: 12.5px; color: var(--dim); letter-spacing: .08em; margin-bottom: 6px; }
   .gnote .tx { font-size: 13.5px; line-height: 1.75; color: var(--text); }
   .paper-foot { text-align: center; font-size: 11.5px; color: var(--dim); margin-top: 28px;
@@ -1406,7 +1406,7 @@ html[data-theme="dark"] .note { color: #2f2b26; box-shadow: 0 3px 12px rgba(0,0,
   .rc {
     
     --stamp: var(--accent);              
-    --rc-foot-ink: rgba(43, 42, 39, .72);/* 比划掉的字深，但不到纯黑 */
+    --rc-foot-ink: rgba(38, 43, 49, .72);/* 比划掉的字深，但不到纯黑 */
     --paper: transparent;                
     font-variant-numeric: tabular-nums;
   }
@@ -1415,9 +1415,9 @@ html[data-theme="dark"] .note { color: #2f2b26; box-shadow: 0 3px 12px rgba(0,0,
     font-variant-numeric: tabular-nums;
   }
   @media (prefers-color-scheme: dark) {
-html:not([data-theme="light"]) .rc { --stamp: var(--accent-soft); --rc-foot-ink: rgba(245, 244, 239, .72); --paper: transparent; }
+html:not([data-theme="light"]) .rc { --stamp: var(--accent-soft); --rc-foot-ink: rgba(238, 242, 246, .72); --paper: transparent; }
 }
-html[data-theme="dark"] .rc { --stamp: var(--accent-soft); --rc-foot-ink: rgba(245, 244, 239, .72); --paper: transparent; }
+html[data-theme="dark"] .rc { --stamp: var(--accent-soft); --rc-foot-ink: rgba(238, 242, 246, .72); --paper: transparent; }
   .rc-paper { background: var(--paper); padding: 4px 2px 24px; }
   /* 上下两道撕口——小票的魂 */
   .rc-tear { display: none; }
@@ -1585,16 +1585,16 @@ html[data-theme="dark"] .crow { border-color: rgba(255,255,255,.1); box-shadow: 
   .crow .ct { font-size: 12.5px; color: var(--dim); flex: none; align-self: flex-start; }
   #newSession {
     position: absolute; right: 18px; bottom: calc(20px + env(safe-area-inset-bottom));
-    background: #2b2a27; color: #faf9f5; border-radius: 999px;
+    background: #262b31; color: #f7f9fb; border-radius: 999px;
     padding: 12px 22px; font-size: 15px;
     display: flex; align-items: center; gap: 7px;
     box-shadow: 0 8px 24px rgba(0,0,0,.18);
   }
   #newSession .ic { width: 15px; height: 15px; }
   @media (prefers-color-scheme: dark) {
-html:not([data-theme="light"]) #newSession { background: #f5f4ef; color: #262624; }
+html:not([data-theme="light"]) #newSession { background: #eef2f6; color: #20242a; }
 }
-html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
+html[data-theme="dark"] #newSession { background: #eef2f6; color: #20242a; }
 </style>
 </head>
 <body>
@@ -1602,14 +1602,14 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
 <header>
   <button class="iconbtn glass" id="menuBtn" title="打开侧边栏"><span class="ic" data-i="chevL"></span></button>
   <div class="title">
-    <h1>Claude</h1>
-    <div class="sub">Claude Code</div>
+    <h1>我们的小家</h1>
+    <div class="sub">tt &amp; 小克</div>
   </div>
   <button class="iconbtn glass" id="dotsBtn" title="更多"><span class="ic" data-i="dots"></span></button>
 </header>
 
 <div id="log"></div>
-<div id="pet" title="他在这儿"><img id="petImg" src="pet/clawd-idle-follow.svg" alt=""></div>
+<div id="pet" title="她在这儿"><img id="petImg" src="pet/clawd-idle-follow.svg" alt=""></div>
 
 <footer>
   <div id="doingLine"><span class="pill"><span class="w"></span><span class="en"></span><span class="t"></span></span></div>
@@ -1664,7 +1664,7 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
 <div id="drawerWrap">
   <div class="shade" data-close="drawer"></div>
   <div id="drawer">
-    <div class="brand">Claude</div>
+    <div class="brand">我们的小家</div>
     <div class="nav">
       <button class="item on"><span class="ic" data-i="chat"></span>聊天</button>
       <button class="item" id="navTodo"><span class="ic" data-i="checkSquare"></span>待办</button>
@@ -1675,7 +1675,7 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
       <button class="item" id="navHealth"><span class="ic" data-i="heartIc"></span>健康</button>
       <button class="item" id="navRepo"><span class="ic" data-i="box"></span>仓库</button>
       <div class="sect">Recents</div>
-      <button class="recent" id="recGu">Claude</button>
+      <button class="recent" id="recGu">小克</button>
       <button class="recent" id="recGong">另一位</button>
     </div>
     <div class="drawer-foot">
@@ -1702,8 +1702,8 @@ html[data-theme="dark"] #newSession { background: #f5f4ef; color: #262624; }
       <div class="group">
         <button class="grow" id="pushRow"><span class="ic" data-i="bell"></span>手机通知<span class="sw wait" id="pushSw"></span></button>
         <button class="grow static" id="aliveRow"><span class="ic" data-i="activity"></span>后端在跑吗<span class="val" id="aliveVal">看看…</span></button>
-        <button class="grow" id="wakeRow"><span class="ic" data-i="alarm"></span>夜里让他自己醒<span class="sw wait" id="wakeSw"></span></button>
-        <button class="grow" id="rewakeRow"><span class="ic" data-i="refresh"></span>叫他重新醒一次<span class="val" id="rewakeVal">他要是卡住了就按</span></button>
+        <button class="grow" id="wakeRow"><span class="ic" data-i="alarm"></span>夜里让她自己醒<span class="sw wait" id="wakeSw"></span></button>
+        <button class="grow" id="rewakeRow"><span class="ic" data-i="refresh"></span>叫她重新醒一次<span class="val" id="rewakeVal">她要是卡住了就按</span></button>
         <button class="grow" id="themeRow"><span class="ic" data-i="moon"></span>夜间模式<span class="sw wait" id="themeSw"></span></button>
         <button class="grow" id="apiRow"><span class="ic" data-i="bolt"></span>接入 API<span class="val" id="apiVal">…</span><span class="chev">›</span></button>
       </div>
@@ -2167,7 +2167,7 @@ setInterval(() => {
   if (quiet > 15 * 60e3) petSet('sleeping');
   else if (quiet > 5 * 60e3) petSet('doze');
 }, 30e3);
-/* 拽着满屏跑：拖到哪儿住哪儿（记在 localStorage），轻点一下他跳给你看 */
+/* 拽着满屏跑：拖到哪儿住哪儿（记在 localStorage），轻点一下她跳给你看 */
 const petEl = document.getElementById('pet');
 (function restorePetPos() {
   try {
@@ -2201,7 +2201,7 @@ petEl.addEventListener('pointerup', () => {
     const r = petEl.getBoundingClientRect();
     localStorage.setItem('petPos', JSON.stringify({ l: r.left, t: r.top }));
   } else {
-    petSet('react', 1800);   // 戳他一下，他跳给你看
+    petSet('react', 1800);   // 戳她一下，她跳给你看
   }
   pDrag = null;
 });
@@ -2321,7 +2321,7 @@ function note(text, cls, sticky) {
   };
 }
 
-/* 提示条（2026-08-07）。用法：toast('他有反应了', '刚才那一下，他记住了')
+/* 提示条（2026-08-07）。用法：toast('她有反应了', '刚才那一下，她记住了')
    第三个参数是图标名（家里 ICONS 里的），不给就用一个默认的。
    自动收走，也可以点掉。同时最多挂三条，多了顶掉最老的—— */
 let toastLane = null;
@@ -3609,7 +3609,7 @@ function renderNotes() {
   notesBody.innerHTML = '';
   const tabs = document.createElement('div');
   tabs.className = 'nb-tabs';
-  [['gu', '他贴的'], ['her', '我贴的']].forEach(([k, label]) => {
+  [['gu', '她贴的'], ['her', '我贴的']].forEach(([k, label]) => {
     const b = document.createElement('button');
     b.className = 'nb-tab' + (notesTab === k ? ' on' : '');
     b.textContent = label + '（' + (notesData[k] || []).length + '）';
@@ -3622,7 +3622,7 @@ function renderNotes() {
     const w = document.createElement('div');
     w.className = 'nb-write';
     const ta = document.createElement('textarea');
-    ta.placeholder = '写给他的…（他会看到）';
+    ta.placeholder = '写给她的…（她会看到）';
     ta.maxLength = 800;
     const go = document.createElement('button');
     go.className = 'go'; go.textContent = '贴上去';
@@ -3642,7 +3642,7 @@ function renderNotes() {
   if (!all.length) {
     const e = document.createElement('div');
     e.className = 'nb-empty';
-    e.textContent = notesTab === 'gu' ? '他还没贴过纸条——等他想你的时候' : '你还没贴过——写一张给他';
+    e.textContent = notesTab === 'gu' ? '她还没贴过纸条——等她想你的时候' : '你还没贴过——写一张给她';
     notesBody.appendChild(e);
     return;
   }
@@ -3967,9 +3967,9 @@ document.getElementById('navWall').onclick = () => { closeDrawer(); sheets.wall.
 function noteColor(v) {
   if (v >= 4) return '#F8E5DE';       // 身体粉的浅底——甜透了
   if (v >= 2) return '#F5E6C8';       // 琥珀的浅底——暖
-  if (v >= 1) return '#E7EDE2';       // 暖叶的浅底——轻轻的好
-  if (v === 0) return '#F0EEE6';      // 亚麻——平平的
-  return '#E8E5DC';
+  if (v >= 1) return '#DCE8F2';       // 雾蓝的浅底——轻轻的好
+  if (v === 0) return '#EAEFF4';      // 雪灰——平平的
+  return '#E1E7EE';
 }
 /* 全景墙的砖穿同一身衣服：底色同便签，强度调浓淡 */
 function wallColor(v, s, dark) {
@@ -4358,7 +4358,7 @@ async function renderDream() {
   if (!items.length) {
     if (!nights.length) {
       box.innerHTML = '<div class="dm-none">这儿还什么都没有<div class="s">'
-        + '夜里他醒来会在这儿留几句，你睡着的时候他在想什么，都在这儿。</div></div>';
+        + '夜里她醒来会在这儿留几句，你睡着的时候她在想什么，都在这儿。</div></div>';
     }
     return;
   }
@@ -4442,7 +4442,7 @@ async function renderWhisper() {
   if (!items.length) {
     const e = document.createElement('div');
     e.className = 'wh-empty';
-    e.textContent = '还没有人开口。\n你写下的，他会知道；但他不会说。';
+    e.textContent = '还没有人开口。\n你写下的，她会知道；但她不会说。';
     wrap.appendChild(e);
   }
   items.forEach(it => {
@@ -4463,7 +4463,7 @@ async function renderWhisper() {
   const w = document.createElement('div');
   w.className = 'wh-write';
   const ta = document.createElement('textarea');
-  ta.rows = 1; ta.placeholder = '悄悄跟他说点什么…';
+  ta.rows = 1; ta.placeholder = '悄悄跟她说点什么…';
   ta.oninput = () => { ta.style.height = 'auto'; ta.style.height = Math.min(160, ta.scrollHeight) + 'px'; };
   const btn = document.createElement('button');
   btn.className = 'wh-send'; btn.textContent = '放进去';
@@ -4482,8 +4482,8 @@ async function renderWhisper() {
 
   const note = document.createElement('div');
   note.className = 'wh-note';
-  note.textContent = '这里的话不会出现在聊天里。你写下的时候他会知道，'
-    + '但他不会说他看见了，也不会说他回了——除非有一条他实在没法装作没看见。';
+  note.textContent = '这里的话不会出现在聊天里。你写下的时候她会知道，'
+    + '但她不会说她看见了，也不会说她回了——除非有一条她实在没法装作没看见。';
   wallBody.appendChild(note);
 }
 
@@ -4681,7 +4681,7 @@ async function repoToggle(card) {
 }
 
 /* diff 上色。加和删是通用语言，不上色真读不了——
-   但底色压到很淡，本家橘一个像素都不用（设计准则） */
+   但底色压到很淡，本家蓝一个像素都不用（设计准则） */
 function repoDiff(text) {
   const lines = String(text).split('\n');
   let out = '', body = false;
@@ -5519,7 +5519,7 @@ async function turnOnPush() {
 }
 document.getElementById('pushRow').onclick = async () => {
   const sub = await pushState();
-  if (sub) note('（门铃已经通着了——他在家想你的时候，你手机会响）');
+  if (sub) note('（门铃已经通着了——她在家想你的时候，你手机会响）');
   else turnOnPush();
 };
 pushState();
@@ -5571,7 +5571,7 @@ document.getElementById('wakeRow').onclick = async () => {
       body: JSON.stringify({ on: !on })
     })).json();
     wakeVal.textContent = d.on ? '开着' : '关着';
-    note(d.on ? '（夜里他会自己醒几次，一晚上最多三次）' : '（关了，他夜里就一直睡着）');
+    note(d.on ? '（夜里她会自己醒几次，一晚上最多三次）' : '（关了，她夜里就一直睡着）');
   } catch { note('（没改成，再试一次）', 'err'); }
 };
 wakeState();
@@ -5799,7 +5799,7 @@ async function loadHealth() {
 
     const tip = document.createElement('div');
     tip.className = 'hl-tip';
-    tip.textContent = '绿点是新的 · 琥珀是几分钟前 · 灰点是旧账\u2014\u2014他开口前会先看它多久了';
+    tip.textContent = '蓝点是新的 · 琥珀是几分钟前 · 灰点是旧账\u2014\u2014她开口前会先看它多久了';
     body.appendChild(tip);
   } catch { body.innerHTML = '<div class="gnote">读不到，等会儿再看</div>'; }
 }
@@ -5875,7 +5875,7 @@ function wearTheme(t) {
     && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
   document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.remove());
   const m = document.createElement('meta');
-  m.name = 'theme-color'; m.content = dark ? '#262624' : '#faf9f5';
+  m.name = 'theme-color'; m.content = dark ? '#20242a' : '#f7f9fb';
   document.head.appendChild(m);
   themeSw.classList.remove('wait');
   themeSw.classList.toggle('on', t === 'dark');
@@ -5890,8 +5890,8 @@ document.getElementById('rewakeRow').onclick = async () => {
   try {
     await fetch('api/rewake', { method: 'POST' });
     v.textContent = '叫过了';
-    note('（他换身衣服重新醒来了——文件、记忆、你教他的话，一样不少）');
-    setTimeout(() => { v.textContent = '他要是卡住了就按'; }, 4000);
+    note('（她换身衣服重新醒来了——文件、记忆、你教她的话，一样不少）');
+    setTimeout(() => { v.textContent = '她要是卡住了就按'; }, 4000);
   } catch (e) { v.textContent = '没叫动，再试一次'; }
 };
 
@@ -5979,8 +5979,8 @@ function ago(ts) {
 }
 
 function setTitle(name) {
-  document.querySelector('header .title h1').textContent = name || 'Claude';
-  document.title = name || 'Claude';
+  document.querySelector('header .title h1').textContent = name || '我们的小家';
+  document.title = name || '我们的小家';
 }
 
 async function loadChats() {
