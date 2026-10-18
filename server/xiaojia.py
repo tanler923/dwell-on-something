@@ -39,6 +39,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+import urllib.error
 import urllib.parse
 import urllib.request
 from urllib.parse import parse_qs, urlparse
@@ -334,6 +335,80 @@ def since_days():
     return (datetime.now(CN).date() - start).days + 1
 
 
+# ---------------- 法定节假日 ----------------
+# 国务院每年 11 月前后发下一年的放假通知；holiday-cn（NateScarlet，MIT）每天抓国务院公告整理成 JSON。
+# 这里去取、存在 data/ 里：今年和以后的三天问一次，还没公布的年份一天问一次，过去的年份取到就不再问。
+# 12 月的日子可能写在下一年的文件里（比如元旦从 12 月 31 日开始放），所以 12 月要两个文件都看。
+
+HOLI_SRC = ('https://cdn.jsdelivr.net/gh/NateScarlet/holiday-cn@master/{y}.json',
+            'https://raw.githubusercontent.com/NateScarlet/holiday-cn/master/{y}.json')
+
+
+def holidays(y):
+    y = int(y)
+    if not 2000 <= y <= 2100:
+        return {}
+    c = load(f'holidays-{y}', None)
+    if c:
+        age = now() - c['at']
+        if (c['days'] and (y < datetime.now(CN).year or age < 3 * 86400)) or (not c['days'] and age < 86400):
+            return c['days']
+    for src in HOLI_SRC:
+        try:
+            req = urllib.request.Request(src.format(y=y), headers={'User-Agent': 'xiaojia'})
+            with urllib.request.urlopen(req, timeout=8) as r:
+                d = json.loads(r.read().decode('utf-8'))
+            days = {x['date']: {'name': x['name'], 'off': bool(x['isOffDay'])} for x in d.get('days', [])}
+            save(f'holidays-{y}', {'at': now(), 'days': days})
+            return days
+        except urllib.error.HTTPError as e:
+            if e.code == 404:                       # 这一年还没公布
+                save(f'holidays-{y}', {'at': now(), 'days': {}})
+                return {}
+        except Exception:
+            continue
+    return c['days'] if c else {}
+
+
+def holiday_on(ds):
+    y = int(ds[:4])
+    return holidays(y).get(ds) or (holidays(y + 1).get(ds) if ds[5:7] == '12' else None)
+
+
+def holiday_lines(a, b):
+    """a 到 b 之间的放假和调休，连着放的并成一段：「10/01–10/07 国庆节放假（7 天）」"""
+    out, run = [], None
+    d, end = datetime.strptime(a, '%Y-%m-%d'), datetime.strptime(b, '%Y-%m-%d')
+    while d <= end:
+        ds = d.strftime('%Y-%m-%d')
+        h = holiday_on(ds)
+        if h and h['off']:
+            if run and run[2] == h['name'] and run[1] == (d - timedelta(days=1)).strftime('%Y-%m-%d'):
+                run[1] = ds
+            else:
+                if run:
+                    out.append(run)
+                run = [ds, ds, h['name']]
+        else:
+            if run:
+                out.append(run)
+                run = None
+            if h:
+                out.append([ds, None, h['name']])
+        d += timedelta(days=1)
+    if run:
+        out.append(run)
+    lines = []
+    for s0, s1, name in out:
+        md = lambda x: x[5:].replace('-', '/')
+        if s1 is None:
+            lines.append(f'{md(s0)} {_wd(s0)} {name}调休，要上班')
+        else:
+            n = (datetime.strptime(s1, '%Y-%m-%d') - datetime.strptime(s0, '%Y-%m-%d')).days + 1
+            lines.append(f'{md(s0)}' + (f'–{md(s1)}' if s1 != s0 else '') + f' {name}放假（{n} 天）')
+    return lines
+
+
 # ---------------- 一起听：问网易云 ----------------
 # 网页里放不了网易云的歌（外链播放器被版权挡了），所以只查歌名、歌手、封面，点「听」唤起手机上的 App。
 # 歌的编号只认这里查到的：小克推歌要先 music_search，不许凭记忆写（原作者翻过车）。
@@ -600,6 +675,9 @@ def tool_home(a):
     lines += [_todo_line(t) for t in todos['mine']] or ['（空）']
     lines += ['', '【接下来两周】']
     lines += [_event_line(ds, e) for ds, e in _events_between(cal, today, end)] or ['（没有安排）']
+    hol = holiday_lines(today, end)
+    if hol:
+        lines += ['（法定节假日）'] + hol
     moods = sorted(cal['period']['days'].items())[-5:]
     lines += ['', '【最近的心情】', '  '.join(f"{d[5:]} {r['mood']}" for d, r in moods if r.get('mood')) or '（没记）']
     lines += ['', f"【便签】tt 贴着 {sum(not n.get('boxed') for n in notes['her'])} 张，你贴着 "
@@ -651,7 +729,9 @@ def tool_cal_list(a):
     to = _arg_date(a.get('to'), (datetime.strptime(frm, '%Y-%m-%d') + timedelta(days=30)).strftime('%Y-%m-%d'))
     cal = load('cal', {'events': [], 'period': {'days': {}}})
     ev = [_event_line(ds, e) for ds, e in _events_between(cal, frm, to)]
-    return f'{frm} 到 {to}：\n' + ('\n'.join(ev) or '（没有安排）')
+    hol = holiday_lines(frm, to)
+    return (f'{frm} 到 {to}：\n' + ('\n'.join(ev) or '（没有安排）')
+            + ('\n\n法定节假日：\n' + '\n'.join(hol) if hol else ''))
 
 
 def tool_cal_add(a):
@@ -907,7 +987,7 @@ TOOLS = {
         'note': {'type': 'string', 'description': '可选，想跟她说的一句话'}}, ['id'])),
     'music_now': (tool_music_now, '看她现在在听什么，还有我们的歌单。', _schema()),
 }
-NO_LOCK = {'music_search', 'music_share'}     # 要去问网易云的，别拿着全屋的锁等网
+NO_LOCK = {'music_search', 'music_share', 'calendar_list', 'home_overview'}     # 要去问网易云的，别拿着全屋的锁等网
 
 
 def mcp_path():
@@ -1180,6 +1260,12 @@ class Handler(BaseHTTPRequestHandler):
                 return self.json({'ok': True, 'items': music_search(q) if q else []})
             except Exception:
                 return self.json({'ok': False, 'items': []})
+        if path == 'api/holidays' and body is None:
+            try:
+                y = int(parse_qs(url.query).get('y', ['0'])[0])
+                return self.json({'ok': True, 'year': y, 'days': holidays(y)})
+            except Exception:
+                return self.json({'ok': False, 'days': {}})
         if path == 'api/listen':
             return self.json(api_listen(body))
         if path == 'api/moments/img' and body is not None:

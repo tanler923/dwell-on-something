@@ -741,6 +741,11 @@ html[data-theme="dark"] .composer {
   .cal-day .dots i { width: 4px; height: 4px; border-radius: 50%; }
   .cal-day .dots .dr { background: var(--dim); }
   .cal-day .dots .ds { background: var(--text); }
+  /* 法定节假日：右上角一个小字，休是粉的，调休上班是琥珀的 */
+  .cal-day .hb { position: absolute; top: 3px; right: 10%; z-index: 2; font-size: 9.5px; line-height: 1; font-weight: 600; color: var(--pink); }
+  .cal-day .hb.work { color: var(--amber); }
+  .cal-hol { font-size: 13px; margin: 6px 0 2px; color: var(--pink); }
+  .cal-hol.work { color: var(--amber); }
   /* 详情区：日期是节标，每件事是一根圆角玻璃条 */
   .cal-detail { margin-top: 20px; }
   .cal-dt { font-size: 12px; color: var(--dim); letter-spacing: .12em;
@@ -4112,6 +4117,20 @@ document.getElementById('navCal').onclick = () => { closeDrawer(); sheets.cal.cl
    跨天回今天由下面那行 calSel = todayStr() 管（后端 8/6 凌晨修的那半）。 */
 let calDay = '';
 
+/* 法定节假日：后端从 holiday-cn 拿（国务院每年的放假通知）。12 月的日子可能在下一年的文件里，两年都看 */
+const HOLI = {};
+async function loadHoli(y) {
+  if (HOLI[y] !== undefined) return;
+  HOLI[y] = null;
+  try { const d = await (await fetch('api/holidays?y=' + y, { cache: 'no-store' })).json(); HOLI[y] = (d && d.days) || {}; }
+  catch { HOLI[y] = {}; }
+  if (sheets.cal.classList.contains('open')) renderCal();
+}
+function holiOn(ds) {
+  const y = +ds.slice(0, 4);
+  return (HOLI[y] && HOLI[y][ds]) || (ds.slice(5, 7) === '12' && HOLI[y + 1] && HOLI[y + 1][ds]) || null;
+}
+
 async function loadCal() {
   calDay = todayStr();
   if (!calData) calBody.innerHTML = '<div class="board-sub" style="padding:30px 0">翻日历中…</div>';
@@ -4172,6 +4191,7 @@ function renderCal() {
   const first = new Date(Y, M - 1, 1);
   const lead = (first.getDay() + 6) % 7;             // 周一开头
   const start = new Date(Y, M - 1, 1 - lead);
+  [start.getFullYear(), Y, Y + 1].forEach(loadHoli);
   for (let i = 0; i < 42; i++) {
     const d = new Date(start); d.setDate(start.getDate() + i);
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -4189,6 +4209,13 @@ function renderCal() {
     if (evs.some(e => e.type === 'special')) { const i2 = document.createElement('i'); i2.className = 'ds'; dots.appendChild(i2); }
     if (evs.some(e => e.type !== 'special')) { const i2 = document.createElement('i'); i2.className = 'dr'; dots.appendChild(i2); }
     cell.appendChild(dots);
+    const hol = holiOn(ds);
+    if (hol) {
+      const hb = document.createElement('span');
+      hb.className = 'hb' + (hol.off ? '' : ' work');
+      hb.textContent = hol.off ? '休' : '班';
+      cell.appendChild(hb);
+    }
     cell.onclick = () => { calSel = ds; renderCal(); };   // 今天由 CSS 定死样式，选中圈不会盖它
     grid.appendChild(cell);
   }
@@ -4205,6 +4232,13 @@ function renderDayDetail(ds) {
   const wd = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][new Date(ds + 'T00:00:00').getDay()];
   t.textContent = ds + ' ' + wd + (ds === todayStr() ? ' · 今天' : '');
   box.appendChild(t);
+  const hol = holiOn(ds);
+  if (hol) {
+    const h = document.createElement('div');
+    h.className = 'cal-hol' + (hol.off ? '' : ' work');
+    h.textContent = hol.name + (hol.off ? ' · 放假' : ' · 调休，要上班');
+    box.appendChild(h);
+  }
 
   /* 这一天的事 */
   const evs = eventsOn(ds);
