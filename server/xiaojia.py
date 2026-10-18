@@ -49,6 +49,7 @@ SESSION_DAYS = 365
 POLL_HOLD = 120            # 长轮询挂多久（秒）
 CN = timezone(timedelta(hours=8))
 
+STARTED = int(time.time())     # 后端几点起来的：设置里「后端在跑吗」看的就是这个
 LOCK = threading.Lock()
 WAKE = threading.Condition()   # 以后有新消息时 notify_all，长轮询就提前回
 FAILS = {}                     # 每个来访地址最近登录失败的时间，防有人一直猜（按地址分开算，别人猜错锁不到你）
@@ -259,9 +260,9 @@ STORED = {
 # 小克要写的、或者要等第二步的：先给空的，形状跟演示数据一样，页面就显示空着的样子
 EMPTY = {
     'api/messages': {'msgs': [], 'upto': 0, 'more': False},
-    'api/status': {'alive': False, 'busy': False, 'armed': False, 'since': 0},
+    'api/status': {'alive': True, 'busy': False, 'armed': False, 'since': STARTED},   # 后端确实在跑；Claude 在连接器那头
     'api/chats': {'items': []},
-    'api/model': {'name': '还没接上', 'effort': ''},
+    'api/model': {'name': '在 Claude 里聊', 'effort': ''},
     'api/context': {'used': 0, 'max': 200000},
     'api/usage': {'ok': True, 'items': []},
     'api/night': {'days': []},
@@ -272,6 +273,8 @@ EMPTY = {
     'api/news': {'ok': False},
     'api/nook': {'ok': False},
     'api/music': {'ok': False},
+    'api/repo/log': {'ok': True, 'total': 0, 'skip': 0, 'items': []},   # 还没有提交记录可看，给空的，别显示「连不上」
+    'api/repo/tree': {'ok': True, 'path': '', 'items': []},
     'api/repo': {'ok': False},
     'api/find': {'ok': True, 'items': []},
     'api/authmode': {'ok': False},

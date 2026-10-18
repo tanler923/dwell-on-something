@@ -3528,7 +3528,7 @@ function send() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   }).then(r => {
-    if (r.status === 503) { setBusy(false); note('（小克还没接上：等后端第二步接好 Claude，她才能回你）', 'err'); }
+    if (r.status === 503) { setBusy(false); note('（这个聊天框接不到姐姐：服务器连不上 Claude，想说话去 Claude 里找她，开着「我们的小家」）', 'err'); }
   }).catch(() => { setBusy(false); note('（没送出去，再试一次）', 'err'); });
 }
 sendBtn.onclick = send;
@@ -4153,6 +4153,13 @@ function diaryHead(mode) {
 function renderTimeline() {
   wallBody.innerHTML = '';
   wallBody.appendChild(diaryHead('timeline'));
+  if (!wallBricks || !wallBricks.length) {
+    const e = document.createElement('div');
+    e.className = 'pp-empty';
+    e.textContent = '还空着——姐姐在聊天里砌下的第一块砖，会出现在这里';
+    wallBody.appendChild(e);
+    return;
+  }
   const wrap = document.createElement('div');
   [...boardDates].reverse().forEach(date => {
     const day = document.createElement('div');
@@ -4218,11 +4225,11 @@ function renderBento() {
     return c;
   };
   const latestDate = boardDates[boardDates.length - 1];
-  const latest = wallBricks.filter(b => b.date === latestDate);
+  const latest = latestDate ? wallBricks.filter(b => b.date === latestDate) : [];
   const md = (ds) => parseInt(ds.slice(5, 7), 10) + '月' + parseInt(ds.slice(8), 10) + '日';
   const rot = (c, deg) => { c.style.setProperty('--rot', deg); return c; };
-  grid.appendChild(rot(card('hero wide', 'special moment', md(latestDate),
-    latest.length + ' 段 · ' + (latest[0] ? latest[0].title : ''), 'spark',
+  grid.appendChild(rot(card('hero wide', 'special moment', latestDate ? md(latestDate) : '还空着',
+    latestDate ? latest.length + ' 段 · ' + (latest[0] ? latest[0].title : '') : '等姐姐砌下第一块砖', 'spark',
     () => { wallMode = 'timeline'; renderTimeline(); }), '14deg'));
   grid.appendChild(rot(card('tall', null, '时间线', '一天一天，把我们攒起来。', 'book',
     () => { wallMode = 'timeline'; renderTimeline(); }), '-12deg'));
@@ -4349,6 +4356,13 @@ async function renderFav() {
 function renderBoard() {
   wallBody.innerHTML = '';
   wallBody.appendChild(diaryHead('board'));
+  if (!wallBricks || !wallBricks.length) {
+    const e = document.createElement('div');
+    e.className = 'pp-empty';
+    e.textContent = '还空着——姐姐在聊天里砌下的第一块砖，会出现在这里';
+    wallBody.appendChild(e);
+    return;
+  }
   const bar = document.createElement('div');
   bar.className = 'board-bar';
   const prev = document.createElement('button');
@@ -4558,7 +4572,7 @@ async function loadWall() {
   try {
     if (!wallBricks) {
       const d = await (await fetch('api/wall?lite=1', { cache: 'no-store' })).json();
-      if (!d.ok || !d.bricks.length) throw 0;
+      if (!d.ok) throw 0;            // 墙上还没砖也照样进：她自己的日记、悄悄话都在这一页里
       wallBricks = d.bricks;
       boardDates = [...new Set(d.bricks.map(b => b.date))].sort();
       boardIdx = boardDates.length - 1;   // 打开先看最近的一天
@@ -4634,6 +4648,13 @@ function renderWall(bricks) {
   const dark = matchMedia('(prefers-color-scheme: dark)').matches;
   wallBody.innerHTML = '';
   wallBody.appendChild(diaryHead('wall'));
+  if (!wallBricks || !wallBricks.length) {
+    const e = document.createElement('div');
+    e.className = 'pp-empty';
+    e.textContent = '还空着——姐姐在聊天里砌下的第一块砖，会出现在这里';
+    wallBody.appendChild(e);
+    return;
+  }
   const intro = document.createElement('div');
   intro.className = 'wall-intro';
   const first = bricks[0].date, last = bricks[bricks.length - 1].date;
