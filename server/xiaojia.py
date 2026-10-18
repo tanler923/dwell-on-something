@@ -147,6 +147,28 @@ def too_many_fails(ip):
     return len(FAILS.get(ip, [])) >= 8
 
 
+# ---------------- 图标直接写进页面 ----------------
+# 免费 ngrok 会把「没带它 cookie 的浏览器请求」拦到一张英文提醒页上；手机做桌面快捷方式时去下载图标
+# 偏偏不带 cookie，拿回来的是提醒页不是小螃蟹。所以页面头上的图标链接，出门前都换成 data:，不用再下载。
+
+_icons = {}
+
+
+def icon_data(name):
+    f = WEB / 'icons' / name
+    m = f.stat().st_mtime
+    if _icons.get(name, (None,))[0] != m:
+        _icons[name] = (m, 'data:image/png;base64,' + base64.b64encode(f.read_bytes()).decode())
+    return _icons[name][1]
+
+
+def inline_icons(html):
+    for name in ('icon-180.png', 'favicon-64.png', 'icon-192.png', 'icon-512.png'):
+        if (WEB / 'icons' / name).exists():
+            html = html.replace(f'href="icons/{name}"', f'href="{icon_data(name)}"')
+    return html
+
+
 # ---------------- 页面版本：index.html 一改，开着的页面会自己刷新 ----------------
 
 _ver = {'mtime': None, 'ver': ''}
@@ -599,6 +621,13 @@ LOGIN_PAGE = '''<!doctype html>
 <meta name="theme-color" content="#f7f9fb" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#20242a" media="(prefers-color-scheme: dark)">
 <title>我们的小家</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/favicon-64.png" sizes="64x64" type="image/png">
+<link rel="icon" href="icons/icon-192.png" sizes="192x192" type="image/png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="我们的小家">
 <style>
   :root { --bg:#f7f9fb; --card:#fff; --line:#e1e7ee; --text:#262b31; --dim:#7d8793; --accent:#5f87ad; --red:#c0392b; }
   @media (prefers-color-scheme: dark) { :root { --bg:#20242a; --card:#2a2f36; --line:#3a4048; --text:#eef2f6; --dim:#9aa4b0; --red:#e07a6a; } }
@@ -749,13 +778,14 @@ class Handler(BaseHTTPRequestHandler):
 
         if path == 'login' and body is not None:
             return self.login(body)
-        if path.startswith('pet/') and body is None:       # 登录页要用小螃蟹，图是公开的
+        # 登录页的小螃蟹、桌面图标和 manifest 是公开的：手机「添加到主屏幕」时还没登录也要拿得到
+        if body is None and (path.startswith(('pet/', 'icons/')) or path == 'manifest.json'):
             return self.static(path)
 
         if not self.authed():
             if path.startswith('api/'):
                 return self.json({'ok': False, 'msg': '没登录'}, 401)
-            return self.html(LOGIN_PAGE)
+            return self.html(inline_icons(LOGIN_PAGE))
 
         if path.startswith('api/'):
             return self.api(path, url, body)
@@ -814,6 +844,7 @@ class Handler(BaseHTTPRequestHandler):
             ctype += '; charset=utf-8'
         if f.name == 'index.html':
             data = data.replace(b'<head>', b'<head><script>window.__XJ_BACKEND__=1</script>', 1)
+            data = inline_icons(data.decode('utf-8')).encode('utf-8')
         self.send(200, data, ctype, cacheable=True)
 
 
