@@ -1108,6 +1108,34 @@ html[data-theme="dark"] .hl-row + .hl-row { border-top-color: rgba(255,255,255,.
   .hl-row .hu { font-size: 12px; color: var(--dim); }
   .hl-row .hdot { width: 6px; height: 6px; border-radius: 50%; flex: none; margin-left: 4px; }
   .hl-tip { font-size: 12px; color: var(--dim); text-align: center; margin: 20px 8px 8px; line-height: 1.8; }
+
+  /* 天气：大字温度一张卡，24 小时横着滑，一周用温度条；零件尽量借健康页那套 */
+  .wx-hero { border-radius: 15px; padding: 16px 18px; background: var(--sage-track);
+             display: flex; align-items: center; gap: 12px; }
+  .wx-hero .wt { font-family: var(--serif); font-size: 46px; line-height: 1; font-weight: 400;
+                 font-variant-numeric: tabular-nums; }
+  .wx-hero .wc { font-size: 15px; font-weight: 600; margin-top: 8px; }
+  .wx-hero .wd { font-size: 12.5px; color: var(--dim); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .wx-hero .wi { margin-left: auto; width: 52px; height: 52px; color: var(--accent); }
+  .wx-hours { display: flex; overflow-x: auto; gap: 2px; padding: 12px 8px; scrollbar-width: none; }
+  .wx-hours::-webkit-scrollbar { display: none; }
+  .wx-h { flex: none; width: 46px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+          font-size: 12px; color: var(--dim); }
+  .wx-h .ic { width: 20px; height: 20px; color: var(--text); }
+  .wx-h .tv { font-size: 14px; color: var(--text); font-variant-numeric: tabular-nums; }
+  .wx-h .pp { font-size: 10.5px; color: var(--accent); min-height: 13px; }
+  .wx-day .hn { flex: none; width: 2.6em; }
+  .wx-day .ic { width: 18px; height: 18px; }
+  .wx-day .pp { width: 2.8em; font-size: 11.5px; color: var(--accent); text-align: right; }
+  .wx-day .lo, .wx-day .hi { width: 2.2em; text-align: right; font-size: 14.5px; font-variant-numeric: tabular-nums; }
+  .wx-day .lo { color: var(--dim); }
+  .wx-bar { flex: 1; height: 5px; border-radius: 999px; background: var(--line); position: relative; margin: 0 6px; }
+  .wx-bar i { position: absolute; top: 0; bottom: 0; border-radius: 999px;
+              background: linear-gradient(90deg, var(--sage), var(--accent)); }
+  .wx-q { width: 100%; font: inherit; font-size: 16px; padding: 11px 14px; border-radius: 12px; margin-bottom: 12px;
+          border: 1px solid var(--line); background: var(--card); color: var(--text); outline: none; }
+  .wx-q:focus { border-color: var(--accent-soft); }
+  .wx-pick { width: 100%; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
   
   .hbars { display: flex; gap: 7px; align-items: flex-end; height: 46px; padding: 12px 15px 2px; }
   .hbars i { flex: 1; background: var(--sage); border-radius: 4px; min-height: 3px; opacity: .8; }
@@ -1669,6 +1697,7 @@ html[data-theme="dark"] #newSession { background: #eef2f6; color: #20242a; }
       <button class="item on"><span class="ic" data-i="chat"></span>聊天</button>
       <button class="item" id="navTodo"><span class="ic" data-i="checkSquare"></span>待办</button>
       <button class="item" id="navCal"><span class="ic" data-i="calendar"></span>日历</button>
+      <button class="item" id="navWeather"><span class="ic" data-i="cloudSun"></span>天气</button>
       <button class="item" id="navWall"><span class="ic" data-i="pen"></span>日记</button>
       <button class="item" id="navNook"><span class="ic" data-i="bookOpen"></span>共读</button>
       <button class="item" id="navNews"><span class="ic" data-i="fileText"></span>日报</button>
@@ -1753,6 +1782,20 @@ html[data-theme="dark"] #newSession { background: #eef2f6; color: #20242a; }
   </div>
 </div>
 
+
+<!-- 天气 -->
+<div class="sheetWrap page" id="weatherSheet">
+  <div class="shade" data-close="weather"></div>
+  <div class="sheet">
+    <div class="grabber"></div>
+    <div class="head">
+      <button class="hbtn" data-close="weather"><span class="ic" data-i="x"></span></button>
+      <div class="ht"></div>
+      <button class="hbtn" id="weatherCity" title="换城市"><span class="ic" data-i="mapPin"></span></button>
+    </div>
+    <div class="body" id="weatherBody"></div>
+  </div>
+</div>
 
 <div class="sheetWrap page" id="chatsSheet">
   <div class="shade" data-close="chats"></div>
@@ -2118,6 +2161,25 @@ const ICONS = {
   faceMad:   S('<circle cx="12" cy="12" r="9"/><path d="M8.7 15.4a4.4 4.4 0 0 1 6.6 0"/><line x1="7.5" y1="8.5" x2="10.4" y2="10"/><line x1="16.5" y1="8.5" x2="13.6" y2="10"/>'),
   faceCry:   S('<circle cx="12" cy="12" r="9"/><path d="M8.5 15.7a4.6 4.6 0 0 1 7 0"/><line x1="9" y1="9.3" x2="9" y2="9.7"/><line x1="15" y1="9.3" x2="15" y2="9.7"/><path d="M9 11.6v2.4"/>'),
   bolt: S('<polygon points="13 2 4 14 11 14 10 22 19 10 12 10 13 2"/>'),
+  /* 天气几枚：feather 的 cloud 家族，cloudSun / fog 是 lucide 的 */
+  sun: S('<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>'
+       + '<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>'
+       + '<line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>'
+       + '<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'),
+  cloud: S('<path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>'),
+  cloudSun: S('<path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/>'
+            + '<path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/>'),
+  rain: S('<line x1="16" y1="13" x2="16" y2="21"/><line x1="8" y1="13" x2="8" y2="21"/><line x1="12" y1="15" x2="12" y2="23"/>'
+        + '<path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/>'),
+  drizzle: S('<line x1="8" y1="19" x2="8" y2="21"/><line x1="8" y1="13" x2="8" y2="15"/><line x1="16" y1="19" x2="16" y2="21"/>'
+           + '<line x1="16" y1="13" x2="16" y2="15"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="12" y1="15" x2="12" y2="17"/>'
+           + '<path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/>'),
+  snow: S('<path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/><line x1="8" y1="16" x2="8.01" y2="16"/>'
+        + '<line x1="8" y1="20" x2="8.01" y2="20"/><line x1="12" y1="18" x2="12.01" y2="18"/><line x1="12" y1="22" x2="12.01" y2="22"/>'
+        + '<line x1="16" y1="16" x2="16.01" y2="16"/><line x1="16" y1="20" x2="16.01" y2="20"/>'),
+  storm: S('<path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"/><polyline points="13 11 9 17 15 17 11 23"/>'),
+  fog: S('<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 17H7"/><path d="M17 21H9"/>'),
+  mapPin: S('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'),
   tool: S('<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>'),
 };
 function fillIcons(root) {
@@ -3575,6 +3637,7 @@ const sheets = {
   ctx: document.getElementById('ctxSheet'),
   chats: document.getElementById('chatsSheet'),
   health: document.getElementById('healthSheet'),
+  weather: document.getElementById('weatherSheet'),
   gong: document.getElementById('gongSheet'),
   repo: document.getElementById('repoSheet'),
 };
@@ -5804,6 +5867,227 @@ async function loadHealth() {
   } catch { body.innerHTML = '<div class="gnote">读不到，等会儿再看</div>'; }
 }
 
+/* ---------- 天气 ----------
+   直接问 Open-Meteo：免费、不用钥匙、国内连得上。不走后端，所以演示模式里也是真天气。
+   城市记在本机，默认九江。跟别的页一个规矩：平平常常的天不啰嗦，真有事才说一句。 */
+const WX_HOME = { name: '九江', lat: 29.705, lon: 116.002 };
+const WX_CODE = {
+  0: ['晴', 'sun'], 1: ['晴间多云', 'cloudSun'], 2: ['多云', 'cloudSun'], 3: ['阴', 'cloud'],
+  45: ['雾', 'fog'], 48: ['雾凇', 'fog'],
+  51: ['毛毛雨', 'drizzle'], 53: ['毛毛雨', 'drizzle'], 55: ['毛毛雨', 'drizzle'],
+  56: ['冻毛毛雨', 'drizzle'], 57: ['冻毛毛雨', 'drizzle'],
+  61: ['小雨', 'rain'], 63: ['中雨', 'rain'], 65: ['大雨', 'rain'], 66: ['冻雨', 'rain'], 67: ['冻雨', 'rain'],
+  71: ['小雪', 'snow'], 73: ['中雪', 'snow'], 75: ['大雪', 'snow'], 77: ['雪粒', 'snow'],
+  80: ['阵雨', 'rain'], 81: ['阵雨', 'rain'], 82: ['大阵雨', 'rain'], 85: ['阵雪', 'snow'], 86: ['阵雪', 'snow'],
+  95: ['雷阵雨', 'storm'], 96: ['雷阵雨', 'storm'], 99: ['雷阵雨', 'storm'],
+};
+const WX_SNOW = [71, 73, 75, 77, 85, 86];
+
+function wxLook(code, isDay) {
+  const [text, icon] = WX_CODE[code] || ['—', 'cloud'];
+  if (isDay === 0 && icon === 'sun') return [text, 'moon'];
+  if (isDay === 0 && icon === 'cloudSun') return [text, 'cloud'];
+  return [text, icon];
+}
+function wxWind(kmh) {          // km/h → 蒲福风级
+  const cut = [1, 6, 12, 20, 29, 39, 50, 62, 75, 89, 103, 118];
+  let lv = 0;
+  while (lv < cut.length && kmh >= cut[lv]) lv++;
+  return lv;
+}
+function wxCity() {
+  try { return JSON.parse(localStorage.getItem('wxCity')) || WX_HOME; } catch { return WX_HOME; }
+}
+function wxSet(c) {
+  try { localStorage.setItem('wxCity', JSON.stringify(c)); } catch {}
+  loadWeather();
+}
+/* 15 分钟内不重复问；网断了就拿上一次的，并且说清楚是几点的 */
+async function wxFetch(c) {
+  const key = c.lat.toFixed(2) + ',' + c.lon.toFixed(2);
+  let cache = null;
+  try { cache = JSON.parse(localStorage.getItem('wxCache')); } catch {}
+  if (cache && cache.key === key && Date.now() - cache.at < 15 * 60e3) return cache;
+  const u = 'https://api.open-meteo.com/v1/forecast?latitude=' + c.lat + '&longitude=' + c.lon
+    + '&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day'
+    + '&hourly=temperature_2m,weather_code,precipitation_probability,is_day&forecast_hours=24'
+    + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
+    + '&timezone=auto&forecast_days=7';
+  try {
+    const d = await (await fetch(u, { cache: 'no-store' })).json();
+    if (!d.current || !d.daily) throw new Error('bad');
+    const fresh = { key, at: Date.now(), d };
+    try { localStorage.setItem('wxCache', JSON.stringify(fresh)); } catch {}
+    return fresh;
+  } catch (e) {
+    if (cache && cache.key === key) return { ...cache, stale: true };
+    throw e;
+  }
+}
+function wxTip(d) {
+  const code = d.daily.weather_code[0];
+  const hi = d.daily.temperature_2m_max[0], lo = d.daily.temperature_2m_min[0];
+  const rain = d.daily.precipitation_probability_max[0] || 0;
+  if (WX_SNOW.includes(code) || WX_SNOW.includes(d.current.weather_code))
+    return '下雪了！你最喜欢的天。穿厚一点再出去堆雪人';
+  if ([95, 96, 99].includes(code)) return '今天有雷阵雨，尽量待在屋里，出门带伞';
+  if (rain >= 50) return '今天 ' + rain + '% 会下雨，出门记得带伞';
+  if (hi >= 33) return '今天最高 ' + Math.round(hi) + '°，多喝水，别在太阳底下待太久';
+  if (lo <= 5) return '今天最低 ' + Math.round(lo) + '°，多穿点';
+  if (hi - lo >= 10) return '早晚温差 ' + Math.round(hi - lo) + '°，带件外套';
+  return '';
+}
+function wxHM(ms) {
+  const t = new Date(ms);
+  return String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0');
+}
+function wxSect(text) {
+  const lab = document.createElement('div');
+  lab.className = 'hsect';
+  lab.textContent = text;
+  return lab;
+}
+
+async function loadWeather() {
+  const body = document.getElementById('weatherBody');
+  const c = wxCity();
+  body.innerHTML = '';
+  const head = document.createElement('div');
+  head.className = 'sh-head';
+  const h1 = document.createElement('h1'); h1.textContent = '天气';
+  const sub = document.createElement('div'); sub.className = 'sub';
+  sub.textContent = c.name + ' · 正在看天…';
+  head.append(h1, sub);
+  body.appendChild(head);
+
+  let r;
+  try { r = await wxFetch(c); }
+  catch { body.insertAdjacentHTML('beforeend', '<div class="gnote">天气没拿到，等会儿再看</div>'); return; }
+  const d = r.d, cur = d.current;
+  sub.textContent = c.name + ' · ' + (r.stale ? '没连上网，这是 ' + wxHM(r.at) + ' 的' : wxHM(r.at) + ' 更新');
+
+  /* 现在：大字温度 */
+  const [text, icon] = wxLook(cur.weather_code, cur.is_day);
+  const hero = document.createElement('div');
+  hero.className = 'wx-hero';
+  hero.innerHTML = '<div><div class="wt"></div><div class="wc"></div><div class="wd"></div></div>'
+    + '<span class="ic wi">' + (ICONS[icon] || '') + '</span>';
+  hero.querySelector('.wt').textContent = Math.round(cur.temperature_2m) + '°';
+  hero.querySelector('.wc').textContent = text + ' · 最高 ' + Math.round(d.daily.temperature_2m_max[0])
+    + '° 最低 ' + Math.round(d.daily.temperature_2m_min[0]) + '°';
+  hero.querySelector('.wd').textContent = '体感 ' + Math.round(cur.apparent_temperature) + '° · 湿度 '
+    + cur.relative_humidity_2m + '% · ' + wxWind(cur.wind_speed_10m) + ' 级风';
+  body.appendChild(hero);
+
+  const tip = wxTip(d);
+  if (tip) {
+    const g = document.createElement('div');
+    g.className = 'gnote';
+    g.textContent = tip;
+    body.appendChild(g);
+  }
+
+  /* 接下来 24 小时：横着滑 */
+  const hours = document.createElement('div');
+  hours.className = 'hl-card wx-hours';
+  d.hourly.time.forEach((tm, i) => {
+    const [, ic] = wxLook(d.hourly.weather_code[i], d.hourly.is_day[i]);
+    const pp = d.hourly.precipitation_probability[i];
+    const h = document.createElement('div');
+    h.className = 'wx-h';
+    h.innerHTML = '<span class="hh"></span><span class="ic">' + (ICONS[ic] || '') + '</span>'
+      + '<span class="tv"></span><span class="pp"></span>';
+    h.querySelector('.hh').textContent = i === 0 ? '现在' : Number(tm.slice(11, 13)) + '时';
+    h.querySelector('.tv').textContent = Math.round(d.hourly.temperature_2m[i]) + '°';
+    if (pp >= 30) h.querySelector('.pp').textContent = pp + '%';
+    hours.appendChild(h);
+  });
+  body.append(wxSect('接下来 24 小时'), hours);
+
+  /* 这一周：温度条按一周里的最低到最高摆 */
+  const week = document.createElement('div');
+  week.className = 'hl-card';
+  const wlo = Math.min(...d.daily.temperature_2m_min), whi = Math.max(...d.daily.temperature_2m_max);
+  const span = Math.max(1, whi - wlo);
+  d.daily.time.forEach((day, i) => {
+    const [, ic] = wxLook(d.daily.weather_code[i], 1);
+    const mn = d.daily.temperature_2m_min[i], mx = d.daily.temperature_2m_max[i];
+    const pp = d.daily.precipitation_probability_max[i];
+    const row = document.createElement('div');
+    row.className = 'hl-row wx-day';
+    row.innerHTML = '<span class="hn"></span><span class="ic">' + (ICONS[ic] || '') + '</span><span class="pp"></span>'
+      + '<span class="lo"></span><span class="wx-bar"><i></i></span><span class="hi"></span>';
+    row.querySelector('.hn').textContent = i === 0 ? '今天' : i === 1 ? '明天'
+      : '周' + '日一二三四五六'[new Date(day + 'T00:00:00').getDay()];
+    if (pp >= 30) row.querySelector('.pp').textContent = pp + '%';
+    row.querySelector('.lo').textContent = Math.round(mn) + '°';
+    row.querySelector('.hi').textContent = Math.round(mx) + '°';
+    const bar = row.querySelector('.wx-bar i');
+    bar.style.left = ((mn - wlo) / span * 100) + '%';
+    bar.style.right = ((whi - mx) / span * 100) + '%';
+    week.appendChild(row);
+  });
+  body.append(wxSect('这一周'), week);
+
+  const foot = document.createElement('div');
+  foot.className = 'hl-tip';
+  foot.textContent = '天气数据来自 Open-Meteo.com · 右上角可以换城市';
+  body.appendChild(foot);
+}
+
+/* 换城市：Open-Meteo 的地名搜索。中文只打「长沙」会先冒出一堆同名小镇，
+   所以顺手再搜一遍「长沙市」，合起来按人口排，大城市就在最上面 */
+function wxPickCity() {
+  const body = document.getElementById('weatherBody');
+  body.innerHTML = '<div class="sh-head"><h1>换个城市</h1><div class="sub">打城市名，按回车，比如 长沙</div></div>'
+    + '<input class="wx-q" type="search" placeholder="城市名" autocomplete="off" enterkeyhint="search">'
+    + '<div class="hl-card"></div>';
+  const q = body.querySelector('.wx-q'), res = body.querySelector('.hl-card');
+  const addRow = (label, hint, onPick) => {
+    const b = document.createElement('button');
+    b.className = 'hl-row wx-pick';
+    const n = document.createElement('span'); n.className = 'hn'; n.textContent = label;
+    const u = document.createElement('span'); u.className = 'hu'; u.textContent = hint;
+    b.append(n, u);
+    if (onPick) b.onclick = onPick; else b.disabled = true;
+    res.appendChild(b);
+  };
+  const cur = wxCity();
+  addRow(cur.name, '现在看的', () => loadWeather());
+  if (cur.name !== WX_HOME.name) addRow(WX_HOME.name, '默认', () => wxSet(WX_HOME));
+
+  let seq = 0;
+  async function search() {
+    const name = q.value.trim();
+    if (!name) return;
+    const my = ++seq;
+    res.innerHTML = '';
+    addRow('找找看…', '');
+    const tries = /^[\x00-\x7f]+$/.test(name) || /[市县区州盟旗]$/.test(name) ? [name] : [name, name + '市'];
+    const found = new Map();
+    for (const t of tries) {
+      try {
+        const j = await (await fetch('https://geocoding-api.open-meteo.com/v1/search?count=8&language=zh&format=json&name='
+          + encodeURIComponent(t))).json();
+        (j.results || []).forEach(x => found.set(x.id, x));
+      } catch {}
+    }
+    if (my !== seq) return;
+    res.innerHTML = '';
+    const list = [...found.values()].sort((a, b) => (b.population || 0) - (a.population || 0)).slice(0, 6);
+    if (!list.length) return addRow('没找到，换个写法试试', '');
+    list.forEach(x => addRow(x.name, [x.admin1, x.country].filter(Boolean).join(' · '),
+      () => wxSet({ name: x.name.replace(/市$/, ''), lat: x.latitude, lon: x.longitude })));
+  }
+  q.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); search(); } });
+  q.focus();
+}
+
+document.getElementById('navWeather').onclick = () => {
+  closeDrawer(); sheets.weather.classList.add('open'); loadWeather();
+};
+document.getElementById('weatherCity').onclick = wxPickCity;
+
 async function loadApi() {
   const b = document.getElementById('apiBody');
   let st = {};
@@ -6403,7 +6687,7 @@ document.addEventListener('touchend', (e) => {
 (() => {
   const NAV = { todo: 'navTodo', cal: 'navCal', wall: 'navWall', news: 'navNews',
                 nook: 'navNook',
-                health: 'navHealth', repo: 'navRepo' };
+                health: 'navHealth', repo: 'navRepo', weather: 'navWeather' };
   let re = '';
   try { re = sessionStorage.getItem('reopenSheet') || ''; sessionStorage.removeItem('reopenSheet'); }
   catch (e) {}
