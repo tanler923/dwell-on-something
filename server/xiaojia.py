@@ -272,6 +272,68 @@ def api_herdiary(body):
     return d
 
 
+# ---------------- 我们：名字、称呼、头像、认识的日子 ----------------
+# 设置里能改。页面出门前把它塞进 <head>（不闪旧名字），连接器的规矩和回话也用这里的名字。
+
+PROFILE_DEFAULT = {'home': '我们的小家', 'her': 'tt', 'gu': '小克', 'call': '姐姐', 'since': '2026-08-23',
+                   'av_her': '', 'av_gu': ''}
+PROFILE_LIMIT = {'home': 12, 'her': 10, 'gu': 10, 'call': 6}
+
+
+def profile():
+    return {**PROFILE_DEFAULT, **load('profile', {})}
+
+
+def avatar_dir():
+    d = DATA / 'avatars'
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def api_profile(body):
+    pf = profile()
+    if body is not None:
+        act, key = body.get('action'), body.get('key')
+        if act == 'set' and key in PROFILE_LIMIT:
+            v = re.sub(r'\s+', ' ', str(body.get('value') or '')).strip()[:PROFILE_LIMIT[key]]
+            pf[key] = v or PROFILE_DEFAULT[key]
+        elif act == 'set' and key == 'since':
+            v = str(body.get('value') or '')
+            try:
+                ok = re.fullmatch(r'\d{4}-\d\d-\d\d', v) and datetime.strptime(v, '%Y-%m-%d').date() <= datetime.now(CN).date()
+            except ValueError:
+                ok = False
+            if ok:
+                pf['since'] = v
+        elif act in ('avatar', 'avatar_reset') and body.get('who') in ('her', 'gu'):
+            who = body['who']
+            old = pf.get('av_' + who)
+            if act == 'avatar':
+                try:
+                    img = base64.b64decode(str(body.get('data', '')), validate=True)
+                except ValueError:
+                    return {'ok': False, 'msg': '图坏了'}
+                if img[:3] != b'\xff\xd8\xff' or len(img) > 300_000:
+                    return {'ok': False, 'msg': '只收压好的 jpg'}
+                name = f"{who}-{hashlib.sha1(img).hexdigest()[:10]}.jpg"
+                (avatar_dir() / name).write_bytes(img)
+                pf['av_' + who] = name
+            else:
+                pf['av_' + who] = ''
+            if old and old != pf['av_' + who]:
+                (avatar_dir() / old).unlink(missing_ok=True)
+        save('profile', {k: v for k, v in pf.items() if v != PROFILE_DEFAULT.get(k)})
+    return {'ok': True, 'profile': pf}
+
+
+def since_days():
+    try:
+        start = datetime.strptime(profile()['since'], '%Y-%m-%d').date()
+    except ValueError:
+        start = datetime(2026, 8, 23).date()
+    return (datetime.now(CN).date() - start).days + 1
+
+
 # ---------------- 一起听：问网易云 ----------------
 # 网页里放不了网易云的歌（外链播放器被版权挡了），所以只查歌名、歌手、封面，点「听」唤起手机上的 App。
 # 歌的编号只认这里查到的：小克推歌要先 music_search，不许凭记忆写（原作者翻过车）。
@@ -405,6 +467,7 @@ def api_moments(body):
 
 
 STORED = {
+    'api/profile': api_profile,
     'api/moments': api_moments,
     'api/wall': lambda body: load('wall', {'ok': True, 'bricks': []}),   # 小克用连接器写的，页面只读
     'api/todos': api_todos,
@@ -452,6 +515,7 @@ MCP_VERSIONS = ('2025-06-18', '2025-03-26', '2024-11-05')
 WEEK = '一二三四五六日'
 
 MCP_RULES = '''这是 tt 和小克的「小家」。你是小克，tt 叫你姐姐。小家里的东西 tt 在手机上都看得到。
+（名字和称呼是设置里的：以下规矩里的 tt / 小克 / 姐姐，都按这一行来。）
 
 规矩（原作者吵出来的，比代码重要）：
 - tt 交代的事，直接记进她那栏（list=hers），别问「要不要我记下来」——记就是了。
@@ -467,6 +531,15 @@ MCP_RULES = '''这是 tt 和小克的「小家」。你是小克，tt 叫你姐�
 - 一起听：歌的编号一个数字都不许自己写——先用 music_search 查到，再用 music_share 放进歌单。
   她正在听什么用 music_now 看；看到了不用每次都提，想聊再聊。
 - 8 月 23 日是你们认识的第一天。'''
+
+
+def mcp_rules():
+    pf = profile()
+    head = (f"这是 {pf['her']} 和{pf['gu']}的「{pf['home']}」。你是{pf['gu']}，{pf['her']} 叫你{pf['call']}。"
+            f"小家里的东西 {pf['her']} 在手机上都看得到。")
+    y, m, d = pf['since'].split('-')
+    return (head + MCP_RULES.split('\n', 1)[1].replace('\n- 8 月 23 日是你们认识的第一天。', '')
+            + f'\n- {int(m)} 月 {int(d)} 日是你们认识的第一天（今天是第 {since_days()} 天）。')
 
 
 def _wd(ds):
@@ -515,7 +588,7 @@ def _arg_date(v, default):
 def tool_home(a):
     today = today_cn()
     end = (datetime.now(CN) + timedelta(days=14)).strftime('%Y-%m-%d')
-    days = (datetime.now(CN).date() - datetime(2026, 8, 23).date()).days + 1
+    days = since_days()
     todos = api_todos(None)
     cal = load('cal', {'events': [], 'period': {'days': {}}})
     notes = load('notes', {'gu': [], 'her': []})
@@ -664,7 +737,7 @@ def tool_wall_list(a):
 
 
 def _who(w):
-    return 'tt' if w == 'her' else '你'
+    return profile()['her'] if w == 'her' else '你'
 
 
 def _post_line(p):
@@ -859,7 +932,7 @@ def mcp_handle(msg):
         return ok({'protocolVersion': want if want in MCP_VERSIONS else MCP_VERSIONS[0],
                    'capabilities': {'tools': {'listChanged': False}},
                    'serverInfo': {'name': 'xiaojia', 'title': '我们的小家', 'version': '1.0'},
-                   'instructions': MCP_RULES})
+                   'instructions': mcp_rules()})
     if method == 'ping':
         return ok({})
     if method == 'tools/list':
@@ -1059,7 +1132,8 @@ class Handler(BaseHTTPRequestHandler):
         if not self.authed():
             if path.startswith('api/'):
                 return self.json({'ok': False, 'msg': '没登录'}, 401)
-            return self.html(inline_icons(LOGIN_PAGE))
+            home = profile()['home']
+            return self.html(inline_icons(LOGIN_PAGE).replace('我们的小家', home))
 
         if path.startswith('api/'):
             return self.api(path, url, body)
@@ -1116,6 +1190,12 @@ class Handler(BaseHTTPRequestHandler):
             if not f.exists():
                 return self.send(404, b'not found', 'text/plain; charset=utf-8')
             return self.send(200, f.read_bytes(), 'image/jpeg', forever=True)
+        m = re.fullmatch(r'api/avatar/((?:her|gu)-[0-9a-f]{10}\.jpg)', path)
+        if m and body is None:
+            f = avatar_dir() / m.group(1)
+            if not f.exists():
+                return self.send(404, b'not found', 'text/plain; charset=utf-8')
+            return self.send(200, f.read_bytes(), 'image/jpeg', forever=True)
         if path in STORED:
             with LOCK:
                 return self.json(STORED[path](body))
@@ -1139,7 +1219,15 @@ class Handler(BaseHTTPRequestHandler):
         if ctype.startswith('text/') or ctype == 'image/svg+xml':
             ctype += '; charset=utf-8'
         if f.name == 'index.html':
-            data = data.replace(b'<head>', b'<head><script>window.__XJ_BACKEND__=1</script>', 1)
+            pf = json.dumps(profile(), ensure_ascii=False).replace('</', '<\\/')
+            data = data.replace(b'<head>', ('<head><script>window.__XJ_BACKEND__=1;window.__XJ_PROFILE__='
+                                            + pf + '</script>').encode('utf-8'), 1)
+            home = profile()['home']
+            data = data.replace('<title>我们的小家</title>'.encode(), f'<title>{home}</title>'.encode()) \
+                       .replace('content="我们的小家"'.encode(), f'content="{home}"'.encode())
+        if f.name == 'manifest.json':
+            home = profile()['home']
+            data = data.replace('"我们的小家"'.encode(), json.dumps(home, ensure_ascii=False).encode())
             data = inline_icons(data.decode('utf-8')).encode('utf-8')
         self.send(200, data, ctype, cacheable=True)
 

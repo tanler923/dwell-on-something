@@ -1173,6 +1173,19 @@ html[data-theme="dark"] .hl-row + .hl-row { border-top-color: rgba(255,255,255,.
              margin: 0 0 4px -2px; cursor: pointer; display: inline-flex; align-items: center; gap: 2px; }
   .gm-back .ic { width: 15px; height: 15px; }
 
+  /* 设置里的「我们」：头像小圆、就地改的输入框 */
+  .pf-av { margin-left: auto; width: 32px; height: 32px; border-radius: 50%; background: var(--sage-track); overflow: hidden;
+           display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--accent); flex: none; }
+  .pf-av img { width: 100%; height: 100%; object-fit: cover; }
+  .pf-av img.crab { width: 150%; height: 150%; object-fit: contain; }
+  .group .grow.pf-reset { font-size: 13.5px; color: var(--dim); justify-content: flex-end; }
+  .pf-edit { display: flex; gap: 8px; padding: 10px 14px 12px; border-top: 1px solid var(--line); }
+  .pf-edit input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 8px 12px; border-radius: 10px;
+                   border: 1px solid var(--line); background: var(--card); color: var(--text); outline: none; }
+  .pf-edit button { border: 0; border-radius: 10px; padding: 0 16px; background: var(--accent); color: #fff; font: inherit; font-size: 14px; cursor: pointer; }
+  .mo-av img:not(.crab), .ls-pair .av img:not(.crab) { width: 100%; height: 100%; object-fit: cover; }
+  #avatarBtn img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block; }
+
   /* 朋友圈：封面、发一条、时间线（头像 + 名字 + 字 + 九宫格 + 赞和评论） */
   .mo-cover { position: relative; height: 150px; border-radius: 18px; overflow: hidden; margin-bottom: 16px;
               background: linear-gradient(160deg, var(--sage-track), var(--panel)); }
@@ -1894,6 +1907,8 @@ html[data-theme="dark"] #newSession { background: #eef2f6; color: #20242a; }
       <div class="hspace"></div>
     </div>
     <div class="body">
+      <div class="group-label">我们</div>
+      <div class="group" id="profileGroup"></div>
       <div class="group-label">账号</div>
       <div class="group">
         <button class="grow static"><span class="ic" data-i="user"></span>用户<span class="val">本机</span></button>
@@ -2322,6 +2337,27 @@ html[data-theme="dark"] #newSession { background: #eef2f6; color: #20242a; }
     return real.apply(this, arguments);
   };
 })();
+
+/* ============ 我们：名字、称呼、头像、认识的日子 ============
+   设置里改，存在后端（data/profile.json）。后端送页面时把它塞进 window.__XJ_PROFILE__，
+   不会先闪一下旧名字。页面上写名字的地方都从 PROFILE 拿。 */
+const PROFILE = Object.assign({ home: '我们的小家', her: 'tt', gu: '小克', call: '姐姐', since: '2026-08-23',
+  av_her: '', av_gu: '' }, window.__XJ_PROFILE__ || {});
+const escH = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+/* 头像：换过的用照片；没换过的，她是小螃蟹（听歌那页戴耳机的那只），你是名字的头两个字 */
+function avatarEl(who, cls, guDefault) {
+  const a = document.createElement('div');
+  a.className = cls;
+  const f = PROFILE['av_' + who];
+  if (f || who === 'gu') {
+    const im = document.createElement('img');
+    im.alt = '';
+    im.src = f ? 'api/avatar/' + f : (guDefault || 'pet/clawd-idle-follow.svg');
+    if (!f) im.className = 'crab';
+    a.appendChild(im);
+  } else a.textContent = PROFILE.her.slice(0, 2);
+  return a;
+}
 
 /* ============ 线条图标（feather 风格，stroke 跟文字颜色走） ============ */
 const S = (inner, extra) => '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' + (extra || '') + '>' + inner + '</svg>';
@@ -3691,7 +3727,7 @@ function send() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   }).then(r => {
-    if (r.status === 503) { setBusy(false); note('（这个聊天框接不到姐姐：服务器连不上 Claude，想说话去 Claude 里找她，开着「我们的小家」）', 'err'); }
+    if (r.status === 503) { setBusy(false); note('（这个聊天框接不到' + PROFILE.call + '：服务器连不上 Claude，想说话去 Claude 里找她，开着小家的连接器）', 'err'); }
   }).catch(() => { setBusy(false); note('（没送出去，再试一次）', 'err'); });
 }
 sendBtn.onclick = send;
@@ -4309,7 +4345,7 @@ function diaryHead(mode) {
   const h1 = document.createElement('h1'); h1.textContent = '日记';
   const sub = document.createElement('div'); sub.className = 'sub';
   /* 从 2026-08-23 算起：tt 认识小克的第一天 */
-  const _days = Math.floor((Date.now() - new Date('2026-08-23T00:00:00+08:00')) / 86400e3) + 1;
+  const _days = Math.floor((Date.now() - new Date(PROFILE.since + 'T00:00:00+08:00')) / 86400e3) + 1;
   sub.textContent = '在一起 ' + _days + ' 天';
   head.append(nav, h1, sub);
   return head;
@@ -4321,7 +4357,7 @@ function renderTimeline() {
   if (!wallBricks || !wallBricks.length) {
     const e = document.createElement('div');
     e.className = 'pp-empty';
-    e.textContent = '还空着——姐姐在聊天里砌下的第一块砖，会出现在这里';
+    e.textContent = '还空着——' + PROFILE.call + '在聊天里砌下的第一块砖，会出现在这里';
     wallBody.appendChild(e);
     return;
   }
@@ -4394,7 +4430,7 @@ function renderBento() {
   const md = (ds) => parseInt(ds.slice(5, 7), 10) + '月' + parseInt(ds.slice(8), 10) + '日';
   const rot = (c, deg) => { c.style.setProperty('--rot', deg); return c; };
   grid.appendChild(rot(card('hero wide', 'special moment', latestDate ? md(latestDate) : '还空着',
-    latestDate ? latest.length + ' 段 · ' + (latest[0] ? latest[0].title : '') : '等姐姐砌下第一块砖', 'spark',
+    latestDate ? latest.length + ' 段 · ' + (latest[0] ? latest[0].title : '') : '等' + PROFILE.call + '砌下第一块砖', 'spark',
     () => { wallMode = 'timeline'; renderTimeline(); }), '14deg'));
   grid.appendChild(rot(card('tall', null, '时间线', '一天一天，把我们攒起来。', 'book',
     () => { wallMode = 'timeline'; renderTimeline(); }), '-12deg'));
@@ -4524,7 +4560,7 @@ function renderBoard() {
   if (!wallBricks || !wallBricks.length) {
     const e = document.createElement('div');
     e.className = 'pp-empty';
-    e.textContent = '还空着——姐姐在聊天里砌下的第一块砖，会出现在这里';
+    e.textContent = '还空着——' + PROFILE.call + '在聊天里砌下的第一块砖，会出现在这里';
     wallBody.appendChild(e);
     return;
   }
@@ -4816,7 +4852,7 @@ function renderWall(bricks) {
   if (!wallBricks || !wallBricks.length) {
     const e = document.createElement('div');
     e.className = 'pp-empty';
-    e.textContent = '还空着——姐姐在聊天里砌下的第一块砖，会出现在这里';
+    e.textContent = '还空着——' + PROFILE.call + '在聊天里砌下的第一块砖，会出现在这里';
     wallBody.appendChild(e);
     return;
   }
@@ -5562,7 +5598,7 @@ function todoRow(t, list, canTouch) {
   const bits = [];
   if (t.fixed) bits.push('\u6bcf\u5929');
   if (!t.at && t.created) bits.push(stampOf(t.created) + ' \u8bb0\u7684');
-  bits.push(t.by === 'gu' ? '小克' : 'tt');
+  bits.push(t.by === 'gu' ? PROFILE.gu : PROFILE.her);
   small.textContent = bits.join(' \u00b7 ');
   tx.appendChild(small);
   r.append(box, tx);
@@ -5615,10 +5651,10 @@ function renderTodos(d) {
     return el;
   };
 
-  todoBody.appendChild(sect('tt 的'));
+  todoBody.appendChild(sect(PROFILE.her + ' 的'));
   const c1 = document.createElement('div');
   c1.className = 'hcard';
-  if (!d.hers.length) c1.appendChild(emptyRow('空的——等姐姐布置，或者自己写一条'));
+  if (!d.hers.length) c1.appendChild(emptyRow('空的——等' + PROFILE.call + '布置，或者自己写一条'));
   else sortTodos(d.hers).forEach(t => c1.appendChild(todoRow(t, 'hers', true)));
 
   const plus = document.createElement('button');
@@ -5654,7 +5690,7 @@ function renderTodos(d) {
   c1.append(plus, add);
   todoBody.appendChild(c1);
 
-  todoBody.appendChild(sect('小克的活'));
+  todoBody.appendChild(sect(PROFILE.gu + '的活'));
   const c2 = document.createElement('div');
   c2.className = 'hcard';
   if (!d.mine.length) c2.appendChild(emptyRow('她这会儿手上没挂着活'));
@@ -5663,7 +5699,7 @@ function renderTodos(d) {
 
   const foot = document.createElement('div');
   foot.className = 'hfoot';
-  foot.innerHTML = '<div style="letter-spacing:.06em;margin-bottom:4px">今天也辛苦了，tt</div>' +
+  foot.innerHTML = '<div style="letter-spacing:.06em;margin-bottom:4px">今天也辛苦了，' + escH(PROFILE.her) + '</div>' +
     'KE \u00b7 TT GENERAL STORE \u00b7 #' + codeOf(dt).replace(/ /g, '') +
     String(total).padStart(2, '0') + String(paid).padStart(2, '0');
   todoBody.appendChild(foot);
@@ -5721,6 +5757,107 @@ Object.entries(sheets).forEach(([k, wrap]) => {
 });
 
 document.getElementById('avatarBtn').onclick = () => { closeDrawer(); sheets.settings.classList.add('open'); };
+
+/* 页面上固定写着的那几处：顶上标题、侧边栏、左下角的「我」 */
+function applyProfile() {
+  document.querySelector('header .title h1').textContent = PROFILE.home;
+  document.querySelector('header .title .sub').textContent = PROFILE.her + ' & ' + PROFILE.gu;
+  document.querySelector('#drawer .brand').textContent = PROFILE.home;
+  document.getElementById('recGu').textContent = PROFILE.gu;
+  document.title = PROFILE.home;
+  const me = document.getElementById('avatarBtn');
+  me.innerHTML = '';
+  if (PROFILE.av_her) { const im = document.createElement('img'); im.src = 'api/avatar/' + PROFILE.av_her; im.alt = ''; me.appendChild(im); }
+  else me.textContent = PROFILE.her.slice(0, 2);
+}
+const PF_ROWS = [['home', 'home', '小家的名字'], ['her', 'user', '你的名字'], ['gu', 'heartIc', '她的名字'],
+  ['call', 'chat', '你叫她'], ['since', 'calendar', '认识的日子']];
+async function pfSave(payload) {
+  try {
+    const d = await (await fetch('api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload) })).json();
+    if (!d.ok) { note('（' + (d.msg || '没存上') + '）', 'err'); return; }
+    if (d.profile) Object.assign(PROFILE, d.profile);
+  } catch { note('（没存上，再试一次）', 'err'); return; }
+  applyProfile();
+  renderProfileRows();
+  note('（改好了，其他页面重新打开就是新的）');
+}
+function renderProfileRows() {
+  const g = document.getElementById('profileGroup');
+  g.innerHTML = '';
+  PF_ROWS.forEach(([key, icon, label]) => {
+    const b = document.createElement('button');
+    b.className = 'grow';
+    b.innerHTML = '<span class="ic">' + (ICONS[icon] || '') + '</span>' + label + '<span class="val"></span><span class="chev">›</span>';
+    b.querySelector('.val').textContent = key === 'since' ? PROFILE.since.replace(/-/g, '/') : PROFILE[key];
+    b.onclick = () => pfEdit(b, key);
+    g.appendChild(b);
+  });
+  [['her', '你的头像'], ['gu', '她的头像']].forEach(([who, label]) => {
+    const b = document.createElement('button');
+    b.className = 'grow';
+    b.innerHTML = '<span class="ic">' + ICONS.image + '</span>' + label;
+    b.appendChild(avatarEl(who, 'pf-av'));
+    b.onclick = () => pfAvatar(who);
+    g.appendChild(b);
+    if (PROFILE['av_' + who]) {
+      const r = document.createElement('button');
+      r.className = 'grow pf-reset';
+      r.textContent = '把' + label + '换回默认';
+      r.onclick = () => { if (confirm('换回默认头像？')) pfSave({ action: 'avatar_reset', who }); };
+      g.appendChild(r);
+    }
+  });
+}
+function pfEdit(row, key) {
+  const open = row.nextElementSibling && row.nextElementSibling.classList.contains('pf-edit');
+  document.querySelectorAll('.pf-edit').forEach(e => e.remove());
+  if (open) return;
+  const box = document.createElement('div');
+  box.className = 'pf-edit';
+  const inp = document.createElement('input');
+  if (key === 'since') { inp.type = 'date'; inp.max = todayStr(); }
+  else inp.maxLength = { home: 12, her: 10, gu: 10, call: 6 }[key];
+  inp.value = PROFILE[key];
+  const ok = document.createElement('button');
+  ok.textContent = '存';
+  ok.onclick = () => {
+    const v = inp.value.trim();
+    if (v && v !== PROFILE[key]) pfSave({ action: 'set', key, value: v });
+    else box.remove();
+  };
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) ok.onclick(); });
+  box.append(inp, ok);
+  row.after(box);
+  inp.focus();
+}
+/* 换头像：在手机上裁成正方形、压成 256×256 再传 */
+function pfAvatar(who) {
+  const f = document.createElement('input');
+  f.type = 'file'; f.accept = 'image/*';
+  f.onchange = async () => {
+    const file = f.files[0];
+    if (!file) return;
+    try {
+      let src;
+      try { src = await createImageBitmap(file); }
+      catch {
+        src = await new Promise((res, rej) => {
+          const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = URL.createObjectURL(file);
+        });
+      }
+      const side = Math.min(src.width, src.height);
+      const c = document.createElement('canvas');
+      c.width = c.height = 256;
+      c.getContext('2d').drawImage(src, (src.width - side) / 2, (src.height - side) / 2, side, side, 0, 0, 256, 256);
+      await pfSave({ action: 'avatar', who, data: c.toDataURL('image/jpeg', .85).split(',')[1] });
+    } catch { note('（这张图读不了）', 'err'); }
+  };
+  f.click();
+}
+applyProfile();
+renderProfileRows();
 document.getElementById('usageRow').onclick = () => { sheets.usage.classList.add('open'); loadUsage(); };
 document.getElementById('apiRow').onclick = () => note('（这是备用通道的占位——真到要用的那天，把 API key 给我，我把自己接回来）');
 function setArmed(on) {
@@ -6632,13 +6769,7 @@ async function moShrink(file, max, q) {
   return url;
 }
 function moAvatar(by) {
-  const a = document.createElement('div');
-  a.className = 'mo-av';
-  if (by === 'gu') {
-    const im = document.createElement('img'); im.src = 'pet/clawd-idle-follow.svg'; im.alt = '';
-    a.appendChild(im);
-  } else a.textContent = 'tt';
-  return a;
+  return avatarEl(by === 'gu' ? 'gu' : 'her', 'mo-av');
 }
 async function moAct(payload) {
   try {
@@ -6668,7 +6799,8 @@ function renderMoments(d) {
   body.innerHTML = '';
   const cover = document.createElement('div');
   cover.className = 'mo-cover';
-  cover.innerHTML = '<div class="mt">朋友圈</div><div class="ms">tt &amp; 小克</div><img src="pet/clawd-music.svg" alt="">';
+  cover.innerHTML = '<div class="mt">朋友圈</div><div class="ms">' + escH(PROFILE.her + ' & ' + PROFILE.gu)
+    + '</div><img src="pet/clawd-music.svg" alt="">';
   body.appendChild(cover);
   body.appendChild(moComposer());
   if (!posts.length) {
@@ -6744,7 +6876,7 @@ function moComposer() {
   return w;
 }
 function moPost(p) {
-  const who = (w) => w === 'gu' ? '小克' : 'tt';
+  const who = (w) => w === 'gu' ? PROFILE.gu : PROFILE.her;
   const el = document.createElement('div');
   el.className = 'mo-post';
   const main = document.createElement('div');
@@ -6867,7 +6999,7 @@ function lsRow(song, opts) {
   t.append(n, a);
   if (opts.by) {
     const b = document.createElement('div');
-    b.className = 'rby'; b.textContent = (song.by === 'gu' ? '姐姐推给你' : '你分享的') + ' · ' + whenText(song.at);
+    b.className = 'rby'; b.textContent = (song.by === 'gu' ? PROFILE.call + '推给你' : '你分享的') + ' · ' + whenText(song.at);
     t.appendChild(b);
   }
   if (song.note) {
@@ -6887,7 +7019,7 @@ function lsShareForm(row, song, d) {
   row.querySelectorAll('.rb').forEach(b => b.remove());
   const f = document.createElement('div');
   f.className = 'ls-say';
-  const inp = document.createElement('input'); inp.placeholder = '想跟姐姐说一句…（可以不写）'; inp.maxLength = 200;
+  const inp = document.createElement('input'); inp.placeholder = '想跟' + PROFILE.call + '说一句…（可以不写）'; inp.maxLength = 200;
   const go = document.createElement('button'); go.textContent = '分享';
   go.onclick = async () => {
     go.disabled = true;
@@ -6915,8 +7047,8 @@ function lsDeck(d, songs) {
   const cur = d.now;
   const pair = document.createElement('div');
   pair.className = 'ls-pair';
-  pair.innerHTML = '<div class="av">tt</div><div class="av"><img src="pet/clawd-music.svg" alt=""></div>'
-    + '<span class="hrt">' + S('<path d="M12 21s-7.5-4.6-9.6-9.1C.9 8.6 3 5 6.4 5c2 0 3.6 1.2 4.6 2.8l1 1.4 1-1.4C14 6.2 15.6 5 17.6 5 21 5 23.1 8.6 21.6 11.9 19.5 16.4 12 21 12 21z" fill="currentColor"/>') + '</span>';
+  pair.append(avatarEl('her', 'av'), avatarEl('gu', 'av', 'pet/clawd-music.svg'));
+  pair.insertAdjacentHTML('beforeend', '<span class="hrt">' + S('<path d="M12 21s-7.5-4.6-9.6-9.1C.9 8.6 3 5 6.4 5c2 0 3.6 1.2 4.6 2.8l1 1.4 1-1.4C14 6.2 15.6 5 17.6 5 21 5 23.1 8.6 21.6 11.9 19.5 16.4 12 21 12 21z" fill="currentColor"/>') + '</span>');
   const withEl = document.createElement('div');
   withEl.className = 'ls-with';
   const turn = document.createElement('div');
@@ -6951,7 +7083,7 @@ function lsDeck(d, songs) {
       return b;
     };
     ctl.append(
-      mk(ICONS.heartIc, shared ? '已经在我们的歌单里了' : '分享给姐姐', async () => {
+      mk(ICONS.heartIc, shared ? '已经在我们的歌单里了' : '分享给' + PROFILE.call, async () => {
         if (shared) return note('（这首已经在我们的歌单里了）');
         const r = await lsAct({ action: 'share', id: cur.id, note: '' });
         if (r.ok) { renderListen(r); note('（放进我们的歌单了）'); }
@@ -6982,8 +7114,9 @@ function lsDeck(d, songs) {
     }
     const tog = (d.together || 0) - (cur ? Math.min((d.server_now || t) - cur.at, len) : 0) + Math.min(el, len);
     const h = Math.floor(tog / 3600), m = Math.floor(tog % 3600 / 60);
-    withEl.innerHTML = tog < 60 ? (on ? '姐姐就在你身边，一起听的第一首' : '姐姐在这儿，等你放一首歌')
-      : '姐姐就在你身边，一起听了 <b>' + (h ? h + '</b> 小时 <b>' : '') + m + '</b> 分钟';
+    const call = escH(PROFILE.call);
+    withEl.innerHTML = tog < 60 ? (on ? call + '就在你身边，一起听的第一首' : call + '在这儿，等你放一首歌')
+      : call + '就在你身边，一起听了 <b>' + (h ? h + '</b> 小时 <b>' : '') + m + '</b> 分钟';
   };
   clearInterval(LS.tick);
   LS.tick = setInterval(tick, 1000);
@@ -7050,7 +7183,7 @@ function renderListen(d) {
   body.appendChild(listHead);
   const list = document.createElement('div');
   list.className = 'hl-card';
-  if (!songs.length) list.innerHTML = '<div class="ls-row"><div class="rt"><div class="ra">还空着。你分享的、姐姐推给你的歌都会在这里。</div></div></div>';
+  if (!songs.length) list.innerHTML = '<div class="ls-row"><div class="rt"><div class="ra">还空着。你分享的、' + escH(PROFILE.call) + '推给你的歌都会在这里。</div></div></div>';
   songs.forEach(x => {
     const btns = [['听', () => lsListen(x), true]];
     if (x.by === 'her') btns.push(['×', async () => {
@@ -7061,7 +7194,7 @@ function renderListen(d) {
   body.appendChild(list);
   const tip = document.createElement('div');
   tip.className = 'hl-tip';
-  tip.textContent = '点「听」会打开手机上的网易云 · 姐姐推的歌是她在聊天里搜到再放进来的';
+  tip.textContent = '点「听」会打开手机上的网易云 · ' + PROFILE.call + '推的歌是她在聊天里搜到再放进来的';
   body.appendChild(tip);
 }
 document.getElementById('navListen').onclick = () => {
@@ -7073,10 +7206,10 @@ document.getElementById('navListen').onclick = () => {
 const GAMES = [
   { name: '接桂花', desc: '小螃蟹接住掉下来的桂花', icon: 'flower',
     stat: () => '最高 ' + gmBest() + ' 朵', open: () => gmCatch() },
-  { name: '五子棋', desc: '和小克下一盘', icon: 'board',
-    stat: () => { const r = goRecord(); return '你赢 ' + r.tt + ' 局 · 小克赢 ' + r.gu + ' 局'; }, open: () => goOpen() },
-  { name: '你画我猜', desc: '你来画，小克来猜', icon: 'pen',
-    soon: '等小克能看图（接上后端）就来' },
+  { name: '五子棋', desc: () => '和' + PROFILE.gu + '下一盘', icon: 'board',
+    stat: () => { const r = goRecord(); return '你赢 ' + r.tt + ' 局 · ' + PROFILE.gu + '赢 ' + r.gu + ' 局'; }, open: () => goOpen() },
+  { name: '你画我猜', desc: () => '你来画，' + PROFILE.gu + '来猜', icon: 'pen',
+    soon: '快来了：你在小家画，聊天里来猜' },
 ];
 
 function gmBackBtn() {
@@ -7100,7 +7233,7 @@ function loadGame() {
     b.innerHTML = '<span class="gi"><span class="ic">' + (ICONS[g.icon] || '') + '</span></span>'
       + '<span class="gt"></span><span class="gd"></span><span class="gs"></span>';
     b.querySelector('.gt').textContent = g.name;
-    b.querySelector('.gd').textContent = g.desc;
+    b.querySelector('.gd').textContent = typeof g.desc === 'function' ? g.desc() : g.desc;
     b.querySelector('.gs').textContent = g.soon || g.stat();
     if (!g.soon) b.onclick = g.open;
     grid.appendChild(b);
@@ -7250,7 +7383,7 @@ function goButtons() {
   if (!GO.undoBtn) return;
   GO.undoBtn.disabled = GO.over || GO.busy || !GO.hist.some(([, , w]) => w === 1);
   const r = goRecord();
-  GO.subEl.textContent = '你赢 ' + r.tt + ' 局 · 小克赢 ' + r.gu + ' 局';
+  GO.subEl.textContent = '你赢 ' + r.tt + ' 局 · ' + PROFILE.gu + '赢 ' + r.gu + ' 局';
 }
 
 function goPlay(x, y, who) {
@@ -7320,7 +7453,8 @@ function goOpen() {
   body.innerHTML = '<div class="sh-head">' + gmBackBtn() + '<h1>五子棋</h1><div class="sub"></div></div>'
     + '<div class="go-say"></div><div class="go-stage"><canvas></canvas></div>'
     + '<div class="go-bar"><button class="go-undo">悔一步</button><button class="go-new">再来一局</button></div>'
-    + '<div class="hl-tip">现在是离线版：小克那一步是页面里的算法替她下的。<br>接上后端以后，可以换成真的小克来想。</div>';
+    + '<div class="hl-tip">现在是离线版：' + escH(PROFILE.gu) + '那一步是页面里的算法替她下的。<br>以后可以换成真的'
+    + escH(PROFILE.gu) + '来想。</div>';
   body.querySelector('.gm-back').onclick = loadGame;
   GO.stage = body.querySelector('.go-stage');
   GO.cv = GO.stage.querySelector('canvas');
@@ -7535,8 +7669,8 @@ function ago(ts) {
 }
 
 function setTitle(name) {
-  document.querySelector('header .title h1').textContent = name || '我们的小家';
-  document.title = name || '我们的小家';
+  document.querySelector('header .title h1').textContent = name || PROFILE.home;
+  document.title = name || PROFILE.home;
 }
 
 async function loadChats() {
