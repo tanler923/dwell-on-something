@@ -2089,6 +2089,7 @@ html[data-theme="dark"] #newSession { background: #eef2f6; color: #20242a; }
    接自己的后端时把这一整块删掉即可，其余代码不用动。
    ───────────────────────────────────────────────────────────── */
 (function () {
+  if (window.__XJ_BACKEND__) return;     // 从 server/xiaojia.py 出来的页面：走真的后端
   const T = 1786000000;
   const said = [
     { seq: 1, kind: 'her',  text: '帮我看看这个函数为什么每次都返回 undefined' },
@@ -3159,10 +3160,15 @@ async function poll() {
     for (const ev of d.events) handle(ev);
     if (pendingVer && tryReload()) return;
   } catch {
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise(r => setTimeout(r, 5000));
   } finally {
     polling = false;
-    poll();
+    if (!document.hidden) poll();
+    else document.addEventListener('visibilitychange', function again() {
+      if (document.hidden) return;
+      document.removeEventListener('visibilitychange', again);
+      poll();
+    });
   }
 }
 // 先把说完的话照着念一遍，游标落在最后一条上；之后的（正在说的那轮）才走事件流
@@ -3521,6 +3527,8 @@ function send() {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
+  }).then(r => {
+    if (r.status === 503) { setBusy(false); note('（小克还没接上：等后端第二步接好 Claude，她才能回你）', 'err'); }
   }).catch(() => { setBusy(false); note('（没送出去，再试一次）', 'err'); });
 }
 sendBtn.onclick = send;

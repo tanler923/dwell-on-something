@@ -1,0 +1,14 @@
+# 小家自己的 ngrok（用的是第二个 ngrok 账号，跟记忆库那条互不相干）
+[Unit]
+Description=xiaojia ngrok tunnel
+After=network-online.target xiaojia.service
+Wants=network-online.target
+
+[Service]
+User=ubuntu
+ExecStart=/snap/bin/ngrok http 8090 --config /home/ubuntu/xiaojia/ngrok.yml --config /home/ubuntu/xiaojia/app/server/ngrok-extra.yml --log stdout
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

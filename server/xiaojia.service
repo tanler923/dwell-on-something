@@ -1,0 +1,16 @@
+# 小家的后端。装法见 server/README.md
+[Unit]
+Description=xiaojia home backend
+After=network.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/xiaojia/app
+Environment=XIAOJIA_DATA=/home/ubuntu/xiaojia/data
+Environment=PYTHONIOENCODING=utf-8
+ExecStart=/usr/bin/python3 /home/ubuntu/xiaojia/app/server/xiaojia.py --port 8090
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
