@@ -60,6 +60,27 @@ systemctl status xiaojia xiaojia-ngrok
 journalctl -u xiaojia -n 50
 ```
 
+## 连接器：让 Claude 里的小克进小家
+
+服务器在国内，调不了 Claude 的 API（对方直接回 `Request not allowed`）。所以反过来：
+小家开一个 MCP 连接器，跟记忆库一样填进 Claude 的「连接器」里，聊天时小克就能进来。
+
+```bash
+XIAOJIA_DATA=~/xiaojia/data python3 ~/xiaojia/app/server/xiaojia.py --mcp-url   # 打出完整地址
+```
+
+地址里那串暗号就是钥匙，别发给别人。万一漏了，换一把：
+
+```bash
+rm ~/xiaojia/data/mcp.json && XIAOJIA_DATA=~/xiaojia/data python3 ~/xiaojia/app/server/xiaojia.py --mcp-url
+```
+
+然后去 Claude 的连接器里把旧地址换成新的。
+
+小克能做的：看一眼小家、记/划/删待办（两栏）、记/删日程、看 tt 的心情、看和贴便签、
+看悄悄话（知道但不说破）、写日记墙。**tt 的日记不在里面**——她说只给自己看。
+规矩写在 `MCP_RULES` 里，连上的时候 Claude 会收到。
+
 ## 省着用 ngrok
 
 免费账号一个月 2 万次请求、1 GB 流量。所以：页面 gzip 压缩，没变的文件回 304，
