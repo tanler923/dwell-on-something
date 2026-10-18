@@ -1136,6 +1136,50 @@ html[data-theme="dark"] .hl-row + .hl-row { border-top-color: rgba(255,255,255,.
           border: 1px solid var(--line); background: var(--card); color: var(--text); outline: none; }
   .wx-q:focus { border-color: var(--accent-soft); }
   .wx-pick { width: 100%; border: 0; background: none; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+
+  /* 小游戏：一块画布，小螃蟹在底下接桂花 */
+  .gm-hud { display: flex; align-items: baseline; justify-content: space-between; padding: 0 4px 10px;
+            font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .gm-hud b { color: var(--text); font-size: 18px; font-weight: 600; margin-left: 4px; }
+  .gm-life { font-size: 16px; letter-spacing: 3px; }
+  .gm-life .on { color: var(--pink); }
+  .gm-life .off { color: var(--line); }
+  .gm-stage { position: relative; border-radius: 15px; background: var(--sage-track); overflow: hidden;
+              touch-action: none; -webkit-user-select: none; user-select: none; height: 360px; }
+  .gm-stage canvas { display: block; width: 100%; height: 100%; }
+  .gm-cover { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+              justify-content: center; gap: 8px; text-align: center; padding: 24px;
+              background: color-mix(in srgb, var(--bg) 70%, transparent); }
+  .gm-cover .t1 { font-family: var(--serif); font-size: 23px; }
+  .gm-cover .t2 { font-size: 13px; color: var(--dim); line-height: 1.85; }
+  .gm-go { margin-top: 8px; border: 0; border-radius: 999px; padding: 10px 28px; font: inherit; font-size: 15px;
+           background: var(--accent); color: #fff; cursor: pointer; }
+
+  /* 小游戏合集：两列卡片，点进去是各自的游戏，左上角回合集 */
+  .gm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .gm-card { border: 0; border-radius: 15px; background: var(--panel); padding: 14px; text-align: left;
+             font: inherit; color: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 4px;
+             min-height: 138px; }
+  .gm-card .gi { width: 38px; height: 38px; border-radius: 11px; background: var(--sage-track); color: var(--accent);
+                 display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
+  .gm-card .gi .ic { width: 20px; height: 20px; }
+  .gm-card .gt { font-size: 15.5px; font-weight: 600; }
+  .gm-card .gd { font-size: 12.5px; color: var(--dim); line-height: 1.6; }
+  .gm-card .gs { font-size: 12px; color: var(--accent); margin-top: auto; padding-top: 6px; font-variant-numeric: tabular-nums; }
+  .gm-card.soon { cursor: default; opacity: .6; }
+  .gm-card.soon .gs { color: var(--dim); }
+  .gm-back { border: 0; background: none; font: inherit; font-size: 13px; color: var(--dim); padding: 0;
+             margin: 0 0 4px -2px; cursor: pointer; display: inline-flex; align-items: center; gap: 2px; }
+  .gm-back .ic { width: 15px; height: 15px; }
+
+  /* 五子棋 */
+  .go-stage { display: flex; justify-content: center; touch-action: manipulation; }
+  .go-stage canvas { display: block; border-radius: 14px; cursor: pointer; }
+  .go-say { min-height: 1.7em; text-align: center; font-size: 14px; margin: 0 0 10px; }
+  .go-bar { display: flex; justify-content: center; gap: 10px; margin-top: 12px; }
+  .go-bar button { border: 0; border-radius: 999px; padding: 8px 18px; font: inherit; font-size: 13.5px;
+                   background: var(--panel); color: var(--text); cursor: pointer; }
+  .go-bar button:disabled { opacity: .45; cursor: default; }
   
   .hbars { display: flex; gap: 7px; align-items: flex-end; height: 46px; padding: 12px 15px 2px; }
   .hbars i { flex: 1; background: var(--sage); border-radius: 4px; min-height: 3px; opacity: .8; }
@@ -1700,6 +1744,7 @@ html[data-theme="dark"] #newSession { background: #eef2f6; color: #20242a; }
       <button class="item" id="navWeather"><span class="ic" data-i="cloudSun"></span>天气</button>
       <button class="item" id="navWall"><span class="ic" data-i="pen"></span>日记</button>
       <button class="item" id="navNook"><span class="ic" data-i="bookOpen"></span>共读</button>
+      <button class="item" id="navGame"><span class="ic" data-i="gamepad"></span>小游戏</button>
       <button class="item" id="navNews"><span class="ic" data-i="fileText"></span>日报</button>
       <button class="item" id="navHealth"><span class="ic" data-i="heartIc"></span>健康</button>
       <button class="item" id="navRepo"><span class="ic" data-i="box"></span>仓库</button>
@@ -1782,6 +1827,20 @@ html[data-theme="dark"] #newSession { background: #eef2f6; color: #20242a; }
   </div>
 </div>
 
+
+<!-- 小游戏 -->
+<div class="sheetWrap page" id="gameSheet">
+  <div class="shade" data-close="game"></div>
+  <div class="sheet">
+    <div class="grabber"></div>
+    <div class="head">
+      <button class="hbtn" data-close="game"><span class="ic" data-i="x"></span></button>
+      <div class="ht"></div>
+      <div class="hspace"></div>
+    </div>
+    <div class="body" id="gameBody"></div>
+  </div>
+</div>
 
 <!-- 天气 -->
 <div class="sheetWrap page" id="weatherSheet">
@@ -2179,6 +2238,14 @@ const ICONS = {
         + '<line x1="16" y1="16" x2="16.01" y2="16"/><line x1="16" y1="20" x2="16.01" y2="20"/>'),
   storm: S('<path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"/><polyline points="13 11 9 17 15 17 11 23"/>'),
   fog: S('<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 17H7"/><path d="M17 21H9"/>'),
+  flower: S('<circle cx="12" cy="7.5" r="3.2"/><circle cx="16.5" cy="12" r="3.2"/><circle cx="12" cy="16.5" r="3.2"/>'
+          + '<circle cx="7.5" cy="12" r="3.2"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/>'),
+  board: S('<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/>'
+         + '<line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/>'
+         + '<circle cx="9" cy="9" r="2.2" fill="currentColor"/><circle cx="15" cy="15" r="2.2"/>'),
+  gamepad: S('<line x1="6" x2="10" y1="11" y2="11"/><line x1="8" x2="8" y1="9" y2="13"/>'
+           + '<line x1="15" x2="15.01" y1="12" y2="12"/><line x1="18" x2="18.01" y1="10" y2="10"/>'
+           + '<path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z"/>'),
   mapPin: S('<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>'),
   tool: S('<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>'),
 };
@@ -3638,6 +3705,7 @@ const sheets = {
   chats: document.getElementById('chatsSheet'),
   health: document.getElementById('healthSheet'),
   weather: document.getElementById('weatherSheet'),
+  game: document.getElementById('gameSheet'),
   gong: document.getElementById('gongSheet'),
   repo: document.getElementById('repoSheet'),
 };
@@ -6088,6 +6156,552 @@ document.getElementById('navWeather').onclick = () => {
 };
 document.getElementById('weatherCity').onclick = wxPickCity;
 
+/* ---------- 小游戏：接桂花 ----------
+   小螃蟹在底下左右走，接住往下掉的桂花；橙色的丹桂一朵算五朵；雨滴碰到三次就结束。
+   全在前端，最高分记在本机。螃蟹照 pet/ 里那只的坐标画（身子 x 2–13、y 6–13，脚到 y 15），
+   一格 = U 像素。这里的随机数是游戏本身要的，跟演示数据那条「不用随机」不冲突。 */
+const GM = { g: null, run: false, raf: 0, last: 0, keys: { left: false, right: false } };
+const GM_BODY = '#DE886D';
+
+function gmBest() {
+  try { return Number(localStorage.getItem('gmBest')) || 0; } catch { return 0; }
+}
+
+function gmCrab(ctx, cx, gy, U, o) {
+  const ox = cx - 7.5 * U, oy = gy - 15 * U;
+  const by = o.walk ? (Math.floor(o.t * 10) % 2) * -.3 : 0;       // 走路时身子一颠一颠
+  const R = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(ox + x * U, oy + y * U, w * U, h * U); };
+  const RR = (x, y, w, h, r, c) => {
+    ctx.fillStyle = c;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(ox + x * U, oy + y * U, w * U, h * U, r * U);
+    else ctx.rect(ox + x * U, oy + y * U, w * U, h * U);
+    ctx.fill();
+  };
+  const line = (pts) => {
+    ctx.beginPath();
+    pts.forEach(([x, y], i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, ox + x * U, oy + (y + by) * U));
+    ctx.stroke();
+  };
+
+  ctx.globalAlpha = .18; R(3, 15, 9, .6, '#000'); ctx.globalAlpha = 1;
+  if (o.hurt) ctx.globalAlpha = Math.floor(o.t * 16) % 2 ? .35 : 1;  // 被雨打到：闪一闪
+
+  const lift = o.walk ? Math.floor(o.t * 10) % 2 : -1;              // 两对脚轮流抬
+  [[3, 0], [5, 1], [9, 0], [11, 1]].forEach(([x, k]) => R(x, 13 - (lift === k ? .6 : 0), 1, 2, GM_BODY));
+  R(2, 6 + by, 11, 7, GM_BODY);
+  const ay = o.happy ? 6.8 : 9;                                       // 接到了：手举起来
+  R(0, ay + by, 2, 2, GM_BODY); R(13, ay + by, 2, 2, GM_BODY);
+
+  ctx.strokeStyle = '#000'; ctx.lineWidth = .7 * U; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (o.hurt) {
+    line([[3.8, 8.1], [5, 9], [3.8, 9.9]]); line([[11.2, 8.1], [10, 9], [11.2, 9.9]]);
+  } else if (o.happy) {
+    line([[3.5, 9.5], [4.5, 8.4], [5.5, 9.5]]); line([[9.5, 9.5], [10.5, 8.4], [11.5, 9.5]]);
+    ctx.globalAlpha = .9; RR(2.5, 10.6 + by, 1.6, .9, .45, '#f4a7a0'); RR(10.9, 10.6 + by, 1.6, .9, .45, '#f4a7a0');
+    ctx.globalAlpha = 1;
+  } else if (o.blink) {
+    R(4, 8.8 + by, 1, .4, '#000'); R(10, 8.8 + by, 1, .4, '#000');
+  } else {
+    R(4, 8 + by, 1, 2, '#000'); R(10, 8 + by, 1, 2, '#000');
+  }
+
+  /* 头上的小鸡 */
+  RR(7.55, 1.7 + by, .6, 1.2, .3, '#E9B83E');
+  RR(5.5, 2.5 + by, 4, 3.6, 1.5, '#F7D460');
+  RR(5.6, 4.5 + by, 1, .9, .45, '#E9B83E'); RR(8.4, 4.5 + by, 1, .9, .45, '#E9B83E');
+  R(6.45, 3.5 + by, .5, .7, '#000'); R(8.05, 3.5 + by, .5, .7, '#000');
+  RR(7.1, 4.3 + by, .8, .5, .2, '#EF8D3C');
+  ctx.globalAlpha = 1;
+}
+
+function gmFlower(ctx, x, y, r, red, rot) {
+  ctx.save();
+  ctx.translate(x, y); ctx.rotate(rot);
+  ctx.fillStyle = red ? '#ef8d3c' : '#f2c94c';
+  for (let i = 0; i < 4; i++) {
+    const a = i * Math.PI / 2;
+    ctx.beginPath(); ctx.arc(Math.cos(a) * r * .55, Math.sin(a) * r * .55, r * .5, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.fillStyle = red ? '#c4581f' : '#d99a2b';
+  ctx.beginPath(); ctx.arc(0, 0, r * .26, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+function gmDrop(ctx, x, y, r) {
+  ctx.fillStyle = '#5f87ad';
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI); ctx.lineTo(x, y - r * 1.9); ctx.closePath(); ctx.fill();
+}
+
+function gmSize() {
+  const g = GM.g;
+  if (!g) return;
+  const w = Math.round(g.stage.getBoundingClientRect().width);
+  if (!w) return;
+  const h = Math.round(Math.min(440, Math.max(300, innerHeight * .55)));
+  g.stage.style.height = h + 'px';
+  const dpr = window.devicePixelRatio || 1;
+  g.canvas.width = w * dpr; g.canvas.height = h * dpr;
+  g.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.w = w; g.h = h; g.gy = h - 12;
+  g.U = Math.max(3, Math.min(4.2, w / 90));
+  g.half = 7.5 * g.U;
+  g.x = Math.min(Math.max(g.x || w / 2, g.half), w - g.half);
+  if (g.tx == null) g.tx = g.x;
+  g.ground = getComputedStyle(document.documentElement).getPropertyValue('--line').trim() || '#e1e7ee';
+}
+
+function gmHud() {
+  const g = GM.g;
+  g.scoreEl.textContent = g.score;
+  g.lifeEl.innerHTML = [0, 1, 2].map(i => '<span class="' + (i < g.life ? 'on' : 'off') + '">♥</span>').join('');
+}
+
+function gmDraw() {
+  const g = GM.g;
+  if (!g || !g.w) return;
+  const ctx = g.ctx;
+  ctx.clearRect(0, 0, g.w, g.h);
+  ctx.fillStyle = g.ground;
+  ctx.fillRect(0, g.gy + 3, g.w, g.h - g.gy - 3);
+  g.items.forEach(it => it.type === 'rain' ? gmDrop(ctx, it.x, it.y, it.r)
+    : gmFlower(ctx, it.x, it.y, it.r, it.type === 'red', it.rot));
+  gmCrab(ctx, g.x, g.gy, g.U, {
+    t: g.t, walk: g.walk, hurt: g.hurt > 0, happy: g.happy > 0 && g.hurt <= 0, blink: g.t % 3.2 > 3.05,
+  });
+  g.fx.forEach(f => {
+    const k = f.age / f.ttl;
+    ctx.globalAlpha = 1 - k;
+    if (f.txt) {
+      ctx.fillStyle = f.red ? '#ef8d3c' : '#d99a2b';
+      ctx.font = '600 15px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(f.txt, f.x, f.y - 26 * k);
+    } else {
+      ctx.fillStyle = '#5f87ad';
+      [-1, 0, 1].forEach(d => { ctx.beginPath(); ctx.arc(f.x + d * 10 * k, f.y - 8 * k + Math.abs(d) * 6 * k, 2.2, 0, Math.PI * 2); ctx.fill(); });
+    }
+  });
+  ctx.globalAlpha = 1;
+}
+
+function gmStep(now) {
+  const g = GM.g;
+  if (!GM.run || !g) return;
+  if (!sheets.game.classList.contains('open')) { GM.run = false; return; }   // 页面关了就停
+  const dt = Math.min(.05, (now - GM.last) / 1000);
+  GM.last = now;
+  g.t += dt;
+  g.hurt = Math.max(0, g.hurt - dt);
+  g.happy = Math.max(0, g.happy - dt);
+
+  if (GM.keys.left) g.tx = g.x - 60;
+  if (GM.keys.right) g.tx = g.x + 60;
+  const dx = Math.max(-520 * dt, Math.min(520 * dt, g.tx - g.x));
+  g.x = Math.min(Math.max(g.x + dx, g.half), g.w - g.half);
+  g.walk = Math.abs(dx) > .3;
+
+  /* 越接越快，雨也越来越多 */
+  g.spawn -= dt;
+  if (g.spawn <= 0) {
+    const lv = Math.min(1, g.score / 150);
+    g.spawn = .8 - .45 * lv + Math.random() * .25;
+    const k = Math.random(), rainP = .14 + .22 * lv;
+    const type = k < rainP ? 'rain' : k < rainP + .09 ? 'red' : 'flower';
+    g.items.push({
+      type, x: 14 + Math.random() * (g.w - 28), y: -14,
+      vy: 120 + 170 * lv + Math.random() * 50, r: type === 'rain' ? 7 : 9,
+      rot: Math.random() * 6, vr: (Math.random() - .5) * 3,
+    });
+  }
+
+  const top = g.gy - 14 * g.U, bot = g.gy - 5 * g.U, reach = 8.5 * g.U;
+  g.items = g.items.filter(it => {
+    it.y += it.vy * dt;
+    it.rot += it.vr * dt;
+    if (it.y + it.r >= top && it.y - it.r <= bot && Math.abs(it.x - g.x) <= reach) {
+      if (it.type === 'rain') {
+        g.life--; g.hurt = .6;
+        g.fx.push({ x: it.x, y: it.y, age: 0, ttl: .45 });
+      } else {
+        const v = it.type === 'red' ? 5 : 1;
+        g.score += v; g.happy = .35;
+        g.fx.push({ x: it.x, y: it.y, txt: '+' + v, red: v > 1, age: 0, ttl: .7 });
+      }
+      gmHud();
+      return false;
+    }
+    return it.y - it.r < g.h;
+  });
+  g.fx = g.fx.filter(f => (f.age += dt) < f.ttl);
+
+  gmDraw();
+  if (g.life <= 0) return gmCover('over');
+  GM.raf = requestAnimationFrame(gmStep);
+}
+
+function gmStart() {
+  const g = GM.g;
+  gmSize();
+  Object.assign(g, { items: [], fx: [], score: 0, life: 3, t: 0, spawn: .6, hurt: 0, happy: 0, x: g.w / 2, tx: g.w / 2 });
+  gmHud();
+  g.cover.style.display = 'none';
+  GM.keys.left = GM.keys.right = false;
+  GM.run = true;
+  GM.last = performance.now();
+  cancelAnimationFrame(GM.raf);
+  GM.raf = requestAnimationFrame(gmStep);
+}
+
+function gmCover(kind) {
+  const g = GM.g;
+  GM.run = false;
+  cancelAnimationFrame(GM.raf);
+  let t1, t2, btn;
+  if (kind === 'start') {
+    t1 = '接住掉下来的桂花';
+    t2 = '左右拖动，或者按方向键，让小螃蟹走<br>橙色的丹桂一朵算五朵 · 躲开雨滴，碰到三次就结束';
+    btn = '开始';
+  } else {
+    const best = gmBest(), s = g.score;
+    if (s > best) { try { localStorage.setItem('gmBest', String(s)); } catch {} }
+    g.bestEl.textContent = Math.max(s, best);
+    t1 = '接了 ' + s + ' 朵桂花';
+    t2 = (s === 0 ? '一朵都没接到……小螃蟹有点委屈'
+      : s < 20 ? '闻到一点点桂花香了'
+      : s < 60 ? '口袋里装满了桂花'
+      : s < 120 ? '整个小家都是桂花香'
+      : '跟那天学校里一样，满地都是桂花')
+      + '<br>' + (s > best ? '新纪录！' : '最高 ' + best + ' 朵');
+    btn = '再来一局';
+  }
+  g.cover.innerHTML = '<div class="t1">' + t1 + '</div><div class="t2">' + t2 + '</div>'
+    + '<button class="gm-go">' + btn + '</button>';
+  g.cover.querySelector('.gm-go').onclick = gmStart;
+  g.cover.style.display = 'flex';
+}
+
+function gmCatch() {
+  const body = document.getElementById('gameBody');
+  body.innerHTML = '<div class="sh-head">' + gmBackBtn() + '<h1>接桂花</h1><div class="sub">最高 <span class="gm-best"></span> 朵</div></div>'
+    + '<div class="gm-hud"><span>桂花<b class="gm-score">0</b></span><span class="gm-life"></span></div>'
+    + '<div class="gm-stage"><canvas></canvas><div class="gm-cover"></div></div>';
+  const stage = body.querySelector('.gm-stage');
+  const canvas = stage.querySelector('canvas');
+  GM.g = {
+    stage, canvas, ctx: canvas.getContext('2d'), cover: stage.querySelector('.gm-cover'),
+    scoreEl: body.querySelector('.gm-score'), lifeEl: body.querySelector('.gm-life'),
+    bestEl: body.querySelector('.gm-best'),
+    items: [], fx: [], score: 0, life: 3, t: 0, hurt: 0, happy: 0,
+  };
+  GM.g.bestEl.textContent = gmBest();
+  body.querySelector('.gm-back').onclick = loadGame;
+  gmHud();
+  gmCover('start');
+  /* 拖到哪儿走到哪儿；鼠标不用按住，跟着走 */
+  const aim = (e) => { GM.g.tx = e.clientX - stage.getBoundingClientRect().left; };
+  /* 没开局时不抓指针，不然点击会被画布截走，「开始」按钮就按不动了 */
+  stage.addEventListener('pointerdown', (e) => {
+    if (!GM.run) return;
+    aim(e);
+    try { stage.setPointerCapture(e.pointerId); } catch {}
+  });
+  stage.addEventListener('pointermove', (e) => { if (e.pointerType === 'mouse' || e.buttons) aim(e); });
+  requestAnimationFrame(() => { gmSize(); gmDraw(); });
+}
+
+/* ---------- 小游戏合集 ----------
+   一张卡一个游戏。soon 的是还要等后端的：比如你画我猜，得小克真能看图才猜得了。 */
+const GAMES = [
+  { name: '接桂花', desc: '小螃蟹接住掉下来的桂花', icon: 'flower',
+    stat: () => '最高 ' + gmBest() + ' 朵', open: () => gmCatch() },
+  { name: '五子棋', desc: '和小克下一盘', icon: 'board',
+    stat: () => { const r = goRecord(); return '你赢 ' + r.tt + ' 局 · 小克赢 ' + r.gu + ' 局'; }, open: () => goOpen() },
+  { name: '你画我猜', desc: '你来画，小克来猜', icon: 'pen',
+    soon: '等小克能看图（接上后端）就来' },
+];
+
+function gmBackBtn() {
+  return '<button class="gm-back"><span class="ic">' + ICONS.chevL + '</span>小游戏</button>';
+}
+function gmStop() {
+  GM.run = false;
+  cancelAnimationFrame(GM.raf);
+  GO.live = false;
+}
+
+function loadGame() {
+  gmStop();
+  const body = document.getElementById('gameBody');
+  body.innerHTML = '<div class="sh-head"><h1>小游戏</h1><div class="sub">一起玩点什么</div></div>'
+    + '<div class="gm-grid"></div>';
+  const grid = body.querySelector('.gm-grid');
+  GAMES.forEach(g => {
+    const b = document.createElement('button');
+    b.className = 'gm-card' + (g.soon ? ' soon' : '');
+    b.innerHTML = '<span class="gi"><span class="ic">' + (ICONS[g.icon] || '') + '</span></span>'
+      + '<span class="gt"></span><span class="gd"></span><span class="gs"></span>';
+    b.querySelector('.gt').textContent = g.name;
+    b.querySelector('.gd').textContent = g.desc;
+    b.querySelector('.gs').textContent = g.soon || g.stat();
+    if (!g.soon) b.onclick = g.open;
+    grid.appendChild(b);
+  });
+}
+
+/* ---------- 五子棋：和小克下 ----------
+   15×15，先手执黑，每局换着先。现在是离线版：小克那一步是 goThink 这段算法下的——
+   给每个空位打分，看自己能连成几个、能不能堵住你，挑分最高的。
+   接上后端以后，把 goThink 换成问后端，让真的小克来想就行，别的不用动。 */
+const GO_N = 15;
+const GO_DIRS = [[1, 0], [0, 1], [1, 1], [1, -1]];
+const GO = { b: null, black: 1, turn: 1, over: false, busy: false, hist: [], win: null, live: false, gen: 0 };   // 1 = 你，2 = 小克
+
+function goRecord() {
+  try { return Object.assign({ tt: 0, gu: 0 }, JSON.parse(localStorage.getItem('goRecord'))); }
+  catch { return { tt: 0, gu: 0 }; }
+}
+function goFirst() {
+  try { return Number(localStorage.getItem('goFirst')) === 2 ? 2 : 1; } catch { return 1; }
+}
+
+/* 在 (x,y) 放下 c 之后，这条线上连着几颗、两头还空着几头 */
+function goLine(b, x, y, dx, dy, c) {
+  let n = 1, open = 0;
+  for (const s of [1, -1]) {
+    for (let i = 1; ; i++) {
+      const nx = x + dx * i * s, ny = y + dy * i * s;
+      if (nx < 0 || ny < 0 || nx >= GO_N || ny >= GO_N) break;
+      if (b[ny][nx] === c) { n++; continue; }
+      if (b[ny][nx] === 0) open++;
+      break;
+    }
+  }
+  return [n, open];
+}
+function goScoreAt(b, x, y, c) {
+  let sc = 0;
+  for (const [dx, dy] of GO_DIRS) {
+    const [n, open] = goLine(b, x, y, dx, dy, c);
+    if (n >= 5) sc += 100000;
+    else if (n === 4) sc += open === 2 ? 10000 : open ? 1000 : 0;
+    else if (n === 3) sc += open === 2 ? 1000 : open ? 100 : 0;
+    else if (n === 2) sc += open === 2 ? 100 : open ? 10 : 0;
+    else sc += open;
+  }
+  return sc;
+}
+function goNear(b, x, y) {
+  for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
+    if (b[y + dy] && b[y + dy][x + dx]) return true;
+  }
+  return false;
+}
+function goThink(b, me) {
+  const you = 3 - me;
+  let best = -1, picks = [], empty = true;
+  for (let y = 0; y < GO_N; y++) for (let x = 0; x < GO_N; x++) {
+    if (b[y][x]) { empty = false; continue; }
+    if (!goNear(b, x, y)) continue;
+    const sc = goScoreAt(b, x, y, me) * 1.1 + goScoreAt(b, x, y, you);   // 进攻略重于防守
+    if (sc > best) { best = sc; picks = [[x, y]]; }
+    else if (sc === best) picks.push([x, y]);
+  }
+  if (empty || !picks.length) return [7, 7];
+  return picks[Math.floor(Math.random() * picks.length)];
+}
+function goWinLine(b, x, y, c) {
+  for (const [dx, dy] of GO_DIRS) {
+    const line = [[x, y]];
+    for (const s of [1, -1]) {
+      for (let i = 1; ; i++) {
+        const nx = x + dx * i * s, ny = y + dy * i * s;
+        if (nx < 0 || ny < 0 || nx >= GO_N || ny >= GO_N || b[ny][nx] !== c) break;
+        line.push([nx, ny]);
+      }
+    }
+    if (line.length >= 5) return line;
+  }
+  return null;
+}
+
+function goSize() {
+  const w = GO.stage.getBoundingClientRect().width;
+  if (!w) return;
+  const S = Math.min(Math.round(w), 460);
+  const dpr = window.devicePixelRatio || 1;
+  GO.cv.width = S * dpr; GO.cv.height = S * dpr;
+  GO.cv.style.width = S + 'px'; GO.cv.style.height = S + 'px';
+  GO.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  GO.S = S;
+  GO.cell = (S - 28) / (GO_N - 1);
+  GO.pad = 14;
+}
+function goDraw() {
+  if (!GO.S) return;
+  const ctx = GO.ctx, S = GO.S, c = GO.cell, pad = GO.pad;
+  const css = getComputedStyle(document.documentElement);
+  const v = (k, d) => css.getPropertyValue(k).trim() || d;
+  const at = (i) => pad + i * c;
+  ctx.clearRect(0, 0, S, S);
+  ctx.fillStyle = v('--sage-track', '#dce8f2');
+  ctx.fillRect(0, 0, S, S);
+  ctx.strokeStyle = v('--dim', '#7d8793');
+  ctx.globalAlpha = .45;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let i = 0; i < GO_N; i++) {
+    ctx.moveTo(at(0), Math.round(at(i)) + .5); ctx.lineTo(at(GO_N - 1), Math.round(at(i)) + .5);
+    ctx.moveTo(Math.round(at(i)) + .5, at(0)); ctx.lineTo(Math.round(at(i)) + .5, at(GO_N - 1));
+  }
+  ctx.stroke();
+  ctx.globalAlpha = .8;
+  ctx.fillStyle = v('--dim', '#7d8793');
+  [[3, 3], [11, 3], [7, 7], [3, 11], [11, 11]].forEach(([x, y]) => {
+    ctx.beginPath(); ctx.arc(at(x), at(y), 2.6, 0, Math.PI * 2); ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+  const r = c * .43;
+  /* 深色模式下棋盘也是深的，黑子得更黑、再描一圈浅边才分得清 */
+  const bg = v('--bg', '#f7f9fb').replace('#', '');
+  const dark = parseInt(bg.slice(0, 2), 16) + parseInt(bg.slice(2, 4), 16) + parseInt(bg.slice(4, 6), 16) < 384;
+  for (let y = 0; y < GO_N; y++) for (let x = 0; x < GO_N; x++) {
+    const who = GO.b[y][x];
+    if (!who) continue;
+    const isBlack = who === GO.black;
+    ctx.beginPath(); ctx.arc(at(x), at(y), r, 0, Math.PI * 2);
+    ctx.fillStyle = isBlack ? (dark ? '#0b0d10' : '#262b31') : '#ffffff';
+    ctx.fill();
+    ctx.lineWidth = dark && isBlack ? 1.5 : 1;
+    ctx.strokeStyle = isBlack ? (dark ? 'rgba(255,255,255,.5)' : 'rgba(255,255,255,.18)') : 'rgba(38,43,49,.35)';
+    ctx.stroke();
+  }
+  const accent = v('--accent', '#5f87ad');
+  const last = GO.hist[GO.hist.length - 1];
+  if (last && !GO.win) {
+    ctx.fillStyle = accent;
+    ctx.beginPath(); ctx.arc(at(last[0]), at(last[1]), r * .28, 0, Math.PI * 2); ctx.fill();
+  }
+  if (GO.win) {
+    ctx.strokeStyle = accent; ctx.lineWidth = 2.5;
+    GO.win.forEach(([x, y]) => { ctx.beginPath(); ctx.arc(at(x), at(y), r + 2, 0, Math.PI * 2); ctx.stroke(); });
+  }
+}
+function goSay(t) { if (GO.sayEl) GO.sayEl.textContent = t; }
+function goButtons() {
+  if (!GO.undoBtn) return;
+  GO.undoBtn.disabled = GO.over || GO.busy || !GO.hist.some(([, , w]) => w === 1);
+  const r = goRecord();
+  GO.subEl.textContent = '你赢 ' + r.tt + ' 局 · 小克赢 ' + r.gu + ' 局';
+}
+
+function goPlay(x, y, who) {
+  GO.b[y][x] = who;
+  GO.hist.push([x, y, who]);
+  const line = goWinLine(GO.b, x, y, who);
+  if (line) {
+    GO.over = true; GO.win = line;
+    const r = goRecord();
+    if (who === 1) r.tt++; else r.gu++;
+    try {
+      localStorage.setItem('goRecord', JSON.stringify(r));
+      localStorage.setItem('goFirst', String(3 - GO.black));      // 下一局换人先
+    } catch {}
+    goSay(who === 1 ? '你赢了！好厉害' : '嘿嘿，这局我赢啦');
+  } else if (GO.hist.length === GO_N * GO_N) {
+    GO.over = true;
+    try { localStorage.setItem('goFirst', String(3 - GO.black)); } catch {}
+    goSay('下满了，平局');
+  } else {
+    GO.turn = 3 - who;
+  }
+  goDraw();
+  goButtons();
+}
+function goAI() {
+  GO.busy = true;
+  goButtons();
+  goSay('让我想想…');
+  const gen = GO.gen;
+  setTimeout(() => {
+    /* 想的这会儿要是退出了、或者点了「再来一局」，这一步就作废，不能落到新棋盘上 */
+    if (!GO.live || GO.over || GO.gen !== gen || GO.turn !== 2) return;
+    const [x, y] = goThink(GO.b, 2);
+    GO.busy = false;
+    goPlay(x, y, 2);
+    if (!GO.over) goSay('该你了');
+  }, 450 + Math.random() * 450);
+}
+function goNew() {
+  GO.gen++;
+  GO.b = Array.from({ length: GO_N }, () => Array(GO_N).fill(0));
+  GO.hist = []; GO.over = false; GO.busy = false; GO.win = null;
+  GO.black = goFirst();
+  GO.turn = GO.black;
+  goDraw();
+  goButtons();
+  if (GO.turn === 2) goAI();
+  else goSay('你先来，黑棋是你的');
+}
+function goUndo() {
+  if (GO.busy || GO.over) return;
+  while (GO.hist.length) {                       // 撤到你上一步之前：小克那步和你那步一起撤
+    const [x, y, w] = GO.hist.pop();
+    GO.b[y][x] = 0;
+    if (w === 1) break;
+  }
+  GO.turn = 1;
+  goDraw();
+  goButtons();
+  goSay('好，这步重新来');
+}
+
+function goOpen() {
+  gmStop();
+  const body = document.getElementById('gameBody');
+  body.innerHTML = '<div class="sh-head">' + gmBackBtn() + '<h1>五子棋</h1><div class="sub"></div></div>'
+    + '<div class="go-say"></div><div class="go-stage"><canvas></canvas></div>'
+    + '<div class="go-bar"><button class="go-undo">悔一步</button><button class="go-new">再来一局</button></div>'
+    + '<div class="hl-tip">现在是离线版：小克那一步是页面里的算法替她下的。<br>接上后端以后，可以换成真的小克来想。</div>';
+  body.querySelector('.gm-back').onclick = loadGame;
+  GO.stage = body.querySelector('.go-stage');
+  GO.cv = GO.stage.querySelector('canvas');
+  GO.ctx = GO.cv.getContext('2d');
+  GO.sayEl = body.querySelector('.go-say');
+  GO.subEl = body.querySelector('.sh-head .sub');
+  GO.undoBtn = body.querySelector('.go-undo');
+  GO.undoBtn.onclick = goUndo;
+  body.querySelector('.go-new').onclick = goNew;
+  GO.cv.addEventListener('click', (e) => {
+    if (GO.over || GO.busy || GO.turn !== 1) return;
+    const rect = GO.cv.getBoundingClientRect();
+    const x = Math.round((e.clientX - rect.left - GO.pad) / GO.cell);
+    const y = Math.round((e.clientY - rect.top - GO.pad) / GO.cell);
+    if (x < 0 || y < 0 || x >= GO_N || y >= GO_N || GO.b[y][x]) return;
+    goPlay(x, y, 1);
+    if (!GO.over) goAI();
+  });
+  GO.live = true;
+  goSize();
+  goNew();
+}
+window.addEventListener('resize', () => { if (GO.live) { goSize(); goDraw(); } });
+
+document.addEventListener('keydown', (e) => {
+  if (!GM.run || /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') { GM.keys.left = true; e.preventDefault(); }
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { GM.keys.right = true; e.preventDefault(); }
+});
+document.addEventListener('keyup', (e) => {
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') GM.keys.left = false;
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') GM.keys.right = false;
+});
+window.addEventListener('resize', () => { if (GM.g) { gmSize(); gmDraw(); } });
+
+document.getElementById('navGame').onclick = () => {
+  closeDrawer(); sheets.game.classList.add('open'); loadGame();
+};
+
 async function loadApi() {
   const b = document.getElementById('apiBody');
   let st = {};
@@ -6687,7 +7301,7 @@ document.addEventListener('touchend', (e) => {
 (() => {
   const NAV = { todo: 'navTodo', cal: 'navCal', wall: 'navWall', news: 'navNews',
                 nook: 'navNook',
-                health: 'navHealth', repo: 'navRepo', weather: 'navWeather' };
+                health: 'navHealth', repo: 'navRepo', weather: 'navWeather', game: 'navGame' };
   let re = '';
   try { re = sessionStorage.getItem('reopenSheet') || ''; sessionStorage.removeItem('reopenSheet'); }
   catch (e) {}
