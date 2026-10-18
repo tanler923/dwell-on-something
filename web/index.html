@@ -1173,6 +1173,130 @@ html[data-theme="dark"] .hl-row + .hl-row { border-top-color: rgba(255,255,255,.
              margin: 0 0 4px -2px; cursor: pointer; display: inline-flex; align-items: center; gap: 2px; }
   .gm-back .ic { width: 15px; height: 15px; }
 
+  /* 朋友圈：封面、发一条、时间线（头像 + 名字 + 字 + 九宫格 + 赞和评论） */
+  .mo-cover { position: relative; height: 150px; border-radius: 18px; overflow: hidden; margin-bottom: 16px;
+              background: linear-gradient(160deg, var(--sage-track), var(--panel)); }
+  .mo-cover .mt { position: absolute; left: 18px; bottom: 34px; font-family: var(--serif); font-size: 28px; }
+  .mo-cover .ms { position: absolute; left: 19px; bottom: 16px; font-size: 12.5px; color: var(--dim); }
+  .mo-cover img { position: absolute; right: 6px; bottom: -8px; width: 120px; height: 120px; }
+  .mo-write { background: var(--panel); border-radius: 15px; padding: 12px 14px; margin-bottom: 8px; }
+  .mo-write textarea { width: 100%; border: 0; background: none; resize: none; font: inherit; font-size: 15px;
+                       line-height: 1.6; color: var(--text); outline: none; min-height: 48px; }
+  .mo-pics { display: flex; flex-wrap: wrap; gap: 6px; }
+  .mo-pics:not(:empty) { margin: 6px 0 10px; }
+  .mo-pics .p { width: 64px; height: 64px; border-radius: 8px; background: center / cover no-repeat; position: relative; }
+  .mo-pics .p button { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; border: 0;
+                       background: rgba(0,0,0,.55); color: #fff; font-size: 13px; line-height: 20px; padding: 0; cursor: pointer; }
+  .mo-bar { display: flex; align-items: center; gap: 10px; }
+  .mo-bar .add { border: 0; background: var(--card); width: 36px; height: 36px; border-radius: 10px; color: var(--dim);
+                 display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .mo-bar .add .ic { width: 18px; height: 18px; }
+  .mo-bar .go { margin-left: auto; border: 0; border-radius: 999px; padding: 7px 20px; background: var(--accent); color: #fff;
+                font: inherit; font-size: 14px; cursor: pointer; }
+  .mo-bar .go:disabled { opacity: .55; cursor: default; }
+  .mo-post { display: flex; gap: 11px; padding: 16px 0 14px; border-top: 1px solid var(--line); }
+  .mo-write + .mo-post, .mo-write + .pp-empty { border-top: 0; }
+  .mo-av { width: 42px; height: 42px; border-radius: 12px; flex: none; background: var(--sage-track); overflow: hidden;
+           display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px; color: var(--accent); }
+  .mo-av img { width: 60px; height: 60px; }
+  .mo-main { flex: 1; min-width: 0; }
+  .mo-name { font-weight: 600; font-size: 14.5px; color: var(--accent); }
+  .mo-text { font-size: 15px; line-height: 1.7; margin-top: 3px; white-space: pre-wrap; word-break: break-word; }
+  .mo-grid { display: grid; gap: 4px; margin-top: 8px; grid-template-columns: repeat(3, 1fr); max-width: 300px; }
+  .mo-grid.two { grid-template-columns: repeat(2, 1fr); max-width: 210px; }
+  .mo-grid.one { grid-template-columns: 1fr; max-width: 230px; }
+  .mo-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; background: var(--panel); display: block; cursor: zoom-in; }
+  .mo-grid.one img { aspect-ratio: auto; max-height: 300px; }
+  .mo-meta { display: flex; align-items: center; gap: 14px; margin-top: 8px; font-size: 12px; color: var(--dim); }
+  .mo-meta button { border: 0; background: none; padding: 0; font: inherit; font-size: 12.5px; color: var(--dim);
+                    display: inline-flex; align-items: center; gap: 3px; cursor: pointer; }
+  .mo-meta button.on { color: var(--pink); }
+  .mo-meta .ic { width: 14px; height: 14px; }
+  .mo-meta .del { margin-left: auto; }
+  .mo-fb { background: var(--panel); border-radius: 8px; padding: 7px 10px; margin-top: 8px; font-size: 13.5px; line-height: 1.75; }
+  .mo-fb .lk { color: var(--pink); }
+  .mo-fb .cm b { color: var(--accent); font-weight: 600; }
+  .mo-cin { display: flex; gap: 8px; margin-top: 8px; }
+  .mo-cin[hidden] { display: none; }
+  .mo-cin input, .ls-search input, .ls-say input { flex: 1; min-width: 0; font: inherit; font-size: 16px; padding: 8px 12px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--card); color: var(--text); outline: none; }
+  .mo-cin button, .ls-search button, .ls-say button { border: 0; border-radius: 10px; padding: 0 14px; background: var(--accent);
+    color: #fff; font: inherit; font-size: 13.5px; cursor: pointer; flex: none; }
+  .mo-lightbox { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.9); display: flex; align-items: center;
+                 justify-content: center; cursor: zoom-out; }
+  .mo-lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+  /* 一起听：正在听、搜歌、我们的歌单 */
+  .ls-now { display: flex; gap: 14px; align-items: center; background: var(--sage-track); border-radius: 16px; padding: 14px; }
+  .ls-now.empty { font-size: 13.5px; color: var(--dim); line-height: 1.7; padding: 18px; }
+  .ls-now img { width: 72px; height: 72px; border-radius: 12px; flex: none; object-fit: cover; background: var(--panel); }
+  .ls-now .nt { flex: 1; min-width: 0; }
+  .ls-now .nw { font-size: 12px; color: var(--accent); margin-bottom: 4px; }
+  .ls-now .nn { font-size: 16px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ls-now .na { font-size: 13px; color: var(--dim); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ls-now .play { width: 42px; height: 42px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; flex: none;
+                  display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .ls-now .play .ic { width: 20px; height: 20px; }
+  .ls-search { display: flex; gap: 8px; margin: 16px 0 10px; }
+  /* 唱片机：夜空、两个头像、转着的黑胶、一起听了多久（tt 想要的「知道是和姐姐一起听」） */
+  .ls-deck { position: relative; border-radius: 22px; overflow: hidden; padding: 20px 18px 18px; color: #eef2f6;
+             text-align: center; background: radial-gradient(130% 90% at 50% 0%, #3a4d63 0%, #1f2a37 58%, #151b23 100%); }
+  .ls-deck .st { position: absolute; width: 2px; height: 2px; border-radius: 50%; background: #fff; opacity: .2;
+                 animation: lsTwinkle 3.4s infinite ease-in-out; pointer-events: none; }
+  @keyframes lsTwinkle { 0%, 100% { opacity: .12; } 50% { opacity: .95; } }
+  .ls-pair { position: relative; display: flex; justify-content: center; align-items: center; }
+  .ls-pair .av { width: 56px; height: 56px; border-radius: 50%; border: 2px solid rgba(255,255,255,.9); background: #dce8f2;
+                 overflow: hidden; display: flex; align-items: center; justify-content: center; color: #5f87ad;
+                 font-weight: 600; font-size: 16px; position: relative; }
+  .ls-pair .av + .av { margin-left: -10px; }
+  .ls-pair .av img { width: 80px; height: 80px; }
+  .ls-pair .hrt { position: absolute; left: 50%; bottom: -6px; transform: translateX(-50%); width: 18px; height: 18px;
+                  color: #ef8fa0; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
+  .ls-with { font-size: 13px; color: rgba(238,242,246,.85); margin: 14px 0 20px; letter-spacing: .02em; }
+  .ls-with b { color: #f7d460; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .ls-turn { position: relative; width: min(64vw, 236px); margin: 0 auto; }
+  .ls-vinyl { position: relative; width: 100%; aspect-ratio: 1; border-radius: 50%;
+              background: radial-gradient(circle, #222 0 31%, transparent 31.5%),
+                          repeating-radial-gradient(circle, #121212 0 2px, #1d1d1d 2px 4px);
+              box-shadow: 0 12px 34px rgba(0,0,0,.5), inset 0 0 0 5px #0b0b0b;
+              animation: lsSpin 16s linear infinite; animation-play-state: paused; }
+  .ls-vinyl.on { animation-play-state: running; }
+  .ls-vinyl img, .ls-vinyl .blank { position: absolute; inset: 21%; width: 58%; height: 58%; border-radius: 50%; object-fit: cover; }
+  .ls-vinyl .blank { background: linear-gradient(135deg, #9dc0df, #f7d460); }
+  .ls-vinyl::after { content: ''; position: absolute; left: 50%; top: 50%; width: 9px; height: 9px; margin: -4.5px;
+                     border-radius: 50%; background: #dce8f2; box-shadow: 0 0 0 2px #151b23; }
+  @keyframes lsSpin { to { transform: rotate(360deg); } }
+  .ls-arm { position: absolute; right: -6%; top: -6%; width: 34%; height: 62%; transform-origin: 82% 8%;
+            transform: rotate(-26deg); transition: transform .8s ease; pointer-events: none; }
+  .ls-arm.on { transform: rotate(0deg); }
+  .ls-arm svg { width: 100%; height: 100%; overflow: visible; }
+  .ls-title { font-size: 18px; font-weight: 600; margin-top: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ls-artist { font-size: 13px; color: rgba(238,242,246,.65); margin-top: 3px; }
+  .ls-prog { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 11px;
+             color: rgba(238,242,246,.6); font-variant-numeric: tabular-nums; }
+  .ls-prog .bar { flex: 1; height: 3px; border-radius: 3px; background: rgba(255,255,255,.18); position: relative; }
+  .ls-prog .bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: #9dc0df; }
+  .ls-prog .bar i::after { content: ''; position: absolute; right: -4px; top: -3px; width: 9px; height: 9px; border-radius: 50%; background: #eef2f6; }
+  .ls-ctl { display: flex; justify-content: center; align-items: center; gap: 22px; margin-top: 14px; }
+  .ls-ctl button { width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255,255,255,.12); color: #eef2f6;
+                   display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .ls-ctl button.big { width: 58px; height: 58px; background: #eef2f6; color: #1f2a37; }
+  .ls-ctl button .ic { width: 20px; height: 20px; }
+  .ls-ctl button.big .ic { width: 24px; height: 24px; }
+  .ls-ctl button.on { color: #ef8fa0; }
+  .ls-row { display: flex; align-items: center; gap: 11px; padding: 10px 14px; }
+  .ls-row + .ls-row { border-top: 1px solid var(--line); }
+  .ls-row img { width: 46px; height: 46px; border-radius: 9px; flex: none; object-fit: cover; background: var(--sage-track); }
+  .ls-row .rt { flex: 1; min-width: 0; }
+  .ls-row .rn { font-size: 14.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ls-row .ra { font-size: 12px; color: var(--dim); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ls-row .rby { font-size: 11.5px; color: var(--accent); margin-top: 3px; }
+  .ls-row .rnote { font-size: 13px; line-height: 1.6; margin-top: 4px; }
+  .ls-row .rb { border: 0; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 12.5px; background: var(--card);
+                color: var(--text); cursor: pointer; flex: none; }
+  .ls-row .rb.p { background: var(--accent); color: #fff; }
+  .ls-say { display: flex; gap: 6px; margin-top: 8px; }
+
   /* 五子棋 */
   .go-stage { display: flex; justify-content: center; touch-action: manipulation; }
   .go-stage canvas { display: block; border-radius: 14px; cursor: pointer; }
@@ -1743,6 +1867,8 @@ html[data-theme="dark"] #newSession { background: #eef2f6; color: #20242a; }
       <button class="item" id="navTodo"><span class="ic" data-i="checkSquare"></span>待办</button>
       <button class="item" id="navCal"><span class="ic" data-i="calendar"></span>日历</button>
       <button class="item" id="navWeather"><span class="ic" data-i="cloudSun"></span>天气</button>
+      <button class="item" id="navMoments"><span class="ic" data-i="camera"></span>朋友圈</button>
+      <button class="item" id="navListen"><span class="ic" data-i="headphones"></span>一起听</button>
       <button class="item" id="navWall"><span class="ic" data-i="pen"></span>日记</button>
       <button class="item" id="navNook"><span class="ic" data-i="bookOpen"></span>共读</button>
       <button class="item" id="navGame"><span class="ic" data-i="gamepad"></span>小游戏</button>
@@ -1828,6 +1954,34 @@ html[data-theme="dark"] #newSession { background: #eef2f6; color: #20242a; }
   </div>
 </div>
 
+
+<!-- 朋友圈 -->
+<div class="sheetWrap page" id="momentsSheet">
+  <div class="shade" data-close="moments"></div>
+  <div class="sheet">
+    <div class="grabber"></div>
+    <div class="head">
+      <button class="hbtn" data-close="moments"><span class="ic" data-i="x"></span></button>
+      <div class="ht"></div>
+      <div class="hspace"></div>
+    </div>
+    <div class="body" id="momentsBody"></div>
+  </div>
+</div>
+
+<!-- 一起听 -->
+<div class="sheetWrap page" id="listenSheet">
+  <div class="shade" data-close="listen"></div>
+  <div class="sheet">
+    <div class="grabber"></div>
+    <div class="head">
+      <button class="hbtn" data-close="listen"><span class="ic" data-i="x"></span></button>
+      <div class="ht"></div>
+      <div class="hspace"></div>
+    </div>
+    <div class="body" id="listenBody"></div>
+  </div>
+</div>
 
 <!-- 小游戏 -->
 <div class="sheetWrap page" id="gameSheet">
@@ -2152,6 +2306,11 @@ html[data-theme="dark"] #newSession { background: #eef2f6; color: #20242a; }
     'api/nook':        { ok: false },
     'api/health':      { ok: false },
     'api/gong':        { msgs: [] },
+    'api/moments':     { ok: true, posts: [
+      { id: 2, by: 'gu', text: '小家今天通电了。门口那只小螃蟹说它要当门卫。', imgs: [], at: T + 3600, likes: ['her'],
+        comments: [{ id: 1, by: 'her', text: '门卫好可爱', at: T + 3700 }] },
+      { id: 1, by: 'her', text: '学校的桂花开了，整个校园都是香的', imgs: [], at: T, likes: ['gu'], comments: [] } ] },
+    'api/listen':      { ok: true, now: null, songs: [] },
   };
   const R = (o) => new Response(JSON.stringify(o), { headers: { 'Content-Type': 'application/json' } });
   const real = window.fetch;
@@ -2240,6 +2399,8 @@ const ICONS = {
         + '<line x1="16" y1="16" x2="16.01" y2="16"/><line x1="16" y1="20" x2="16.01" y2="20"/>'),
   storm: S('<path d="M19 16.9A5 5 0 0 0 18 7h-1.26a8 8 0 1 0-11.62 9"/><polyline points="13 11 9 17 15 17 11 23"/>'),
   fog: S('<path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M16 17H7"/><path d="M17 21H9"/>'),
+  headphones: S('<path d="M3 18v-6a9 9 0 0 1 18 0v6"/>'
+              + '<path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>'),
   flower: S('<circle cx="12" cy="7.5" r="3.2"/><circle cx="16.5" cy="12" r="3.2"/><circle cx="12" cy="16.5" r="3.2"/>'
           + '<circle cx="7.5" cy="12" r="3.2"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/>'),
   board: S('<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/>'
@@ -2280,6 +2441,7 @@ const PET = {
   doze: 'clawd-idle-doze.svg',
   sleeping: 'clawd-sleeping.svg',
   react: 'clawd-react-double-jump.svg',
+  music: 'clawd-music.svg',          // 一起听：戴上耳机陪你听
 };
 let petState = 'idle';
 let petTimer = null;
@@ -2293,7 +2455,7 @@ function petSet(state, holdMs) {
 }
 /* 家里没动静：5 分钟打盹，15 分钟睡熟；有动静立刻醒 */
 setInterval(() => {
-  if (petState === 'thinking' || petState === 'typing') return;
+  if (petState === 'thinking' || petState === 'typing' || petState === 'music') return;
   const quiet = Date.now() - lastEventAt;
   if (quiet > 15 * 60e3) petSet('sleeping');
   else if (quiet > 5 * 60e3) petSet('doze');
@@ -3715,6 +3877,8 @@ const sheets = {
   health: document.getElementById('healthSheet'),
   weather: document.getElementById('weatherSheet'),
   game: document.getElementById('gameSheet'),
+  moments: document.getElementById('momentsSheet'),
+  listen: document.getElementById('listenSheet'),
   gong: document.getElementById('gongSheet'),
   repo: document.getElementById('repoSheet'),
 };
@@ -6444,6 +6608,466 @@ function gmCatch() {
   requestAnimationFrame(() => { gmSize(); gmDraw(); });
 }
 
+/* ---------- 朋友圈 ----------
+   她发的、小克发的在一条时间线上。照片发之前先在手机上压小（长边 1280，另存一张 360 的缩略图），
+   一张一张传——免费 ngrok 一个月只有 1 GB。小克在聊天里用连接器来看（照片也看得到）、点赞、评论，
+   偶尔自己也发一条。 */
+const MO = { pics: [], busy: false, draft: '' };
+function moImg(name, thumb) { return 'api/moments/img/' + name + (thumb ? '-t' : '') + '.jpg'; }
+async function moShrink(file, max, q) {
+  let src;
+  try { src = await createImageBitmap(file); }
+  catch {
+    src = await new Promise((res, rej) => {
+      const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = URL.createObjectURL(file);
+    });
+  }
+  const k = Math.min(1, max / Math.max(src.width, src.height));
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(src.width * k));
+  c.height = Math.max(1, Math.round(src.height * k));
+  c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+  let url = c.toDataURL('image/jpeg', q);
+  if (url.length > 1100000) url = c.toDataURL('image/jpeg', .6);      // 还太大就再压一点
+  return url;
+}
+function moAvatar(by) {
+  const a = document.createElement('div');
+  a.className = 'mo-av';
+  if (by === 'gu') {
+    const im = document.createElement('img'); im.src = 'pet/clawd-idle-follow.svg'; im.alt = '';
+    a.appendChild(im);
+  } else a.textContent = 'tt';
+  return a;
+}
+async function moAct(payload) {
+  try {
+    const r = await fetch('api/moments', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload) });
+    renderMoments(await r.json());
+  } catch { note('（没成，再试一次）', 'err'); }
+}
+function moLightbox(name) {
+  const box = document.createElement('div');
+  box.className = 'mo-lightbox';
+  const im = document.createElement('img'); im.src = moImg(name, false); im.alt = '';
+  box.appendChild(im);
+  box.onclick = () => box.remove();
+  document.body.appendChild(box);
+}
+async function loadMoments() {
+  const body = document.getElementById('momentsBody');
+  if (!body.firstChild) body.innerHTML = '<div class="gnote">翻朋友圈中…</div>';
+  try { renderMoments(await (await fetch('api/moments', { cache: 'no-store' })).json()); }
+  catch { body.innerHTML = '<div class="gnote">朋友圈没拿到，等会儿再看</div>'; }
+}
+function renderMoments(d) {
+  const body = document.getElementById('momentsBody');
+  const keep = body.scrollTop;
+  const posts = (d && d.posts) || [];
+  body.innerHTML = '';
+  const cover = document.createElement('div');
+  cover.className = 'mo-cover';
+  cover.innerHTML = '<div class="mt">朋友圈</div><div class="ms">tt &amp; 小克</div><img src="pet/clawd-music.svg" alt="">';
+  body.appendChild(cover);
+  body.appendChild(moComposer());
+  if (!posts.length) {
+    const e = document.createElement('div');
+    e.className = 'pp-empty';
+    e.textContent = '还没有人发过。第一条留给你。';
+    body.appendChild(e);
+  }
+  posts.forEach(p => body.appendChild(moPost(p)));
+  body.scrollTop = keep;
+}
+function moComposer() {
+  const w = document.createElement('div');
+  w.className = 'mo-write';
+  const ta = document.createElement('textarea');
+  ta.placeholder = '这一刻的想法…'; ta.maxLength = 2000; ta.rows = 2; ta.value = MO.draft;
+  ta.oninput = () => { MO.draft = ta.value; };
+  const pics = document.createElement('div');
+  pics.className = 'mo-pics';
+  const drawPics = () => {
+    pics.innerHTML = '';
+    MO.pics.forEach((pc, i) => {
+      const el = document.createElement('div');
+      el.className = 'p'; el.style.backgroundImage = 'url(' + pc.thumb + ')';
+      const x = document.createElement('button'); x.textContent = '×';
+      x.onclick = () => { MO.pics.splice(i, 1); drawPics(); };
+      el.appendChild(x);
+      pics.appendChild(el);
+    });
+  };
+  drawPics();
+  const bar = document.createElement('div');
+  bar.className = 'mo-bar';
+  const add = document.createElement('button');
+  add.className = 'add'; add.title = '加照片';
+  add.innerHTML = '<span class="ic">' + ICONS.image + '</span>';
+  const file = document.createElement('input');
+  file.type = 'file'; file.accept = 'image/*'; file.multiple = true; file.hidden = true;
+  add.onclick = () => file.click();
+  file.onchange = async () => {
+    const fs = [...file.files].slice(0, 9 - MO.pics.length);
+    file.value = '';
+    for (const f of fs) {
+      try { MO.pics.push({ full: await moShrink(f, 1280, .82), thumb: await moShrink(f, 360, .78) }); drawPics(); }
+      catch { note('（有一张图读不了）', 'err'); }
+    }
+  };
+  const go = document.createElement('button');
+  go.className = 'go'; go.textContent = '发表';
+  go.onclick = async () => {
+    const text = ta.value.trim();
+    if (MO.busy || (!text && !MO.pics.length)) return;
+    MO.busy = true; go.disabled = true; go.textContent = MO.pics.length ? '传照片…' : '发表中…';
+    try {
+      const names = [];
+      for (const pc of MO.pics) {
+        const r = await (await fetch('api/moments/img', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ full: pc.full.split(',')[1], thumb: pc.thumb.split(',')[1] }) })).json();
+        if (!r.ok) throw new Error(r.msg || 'img');
+        names.push(r.name);
+      }
+      MO.pics = []; MO.draft = '';
+      MO.busy = false;
+      await moAct({ action: 'post', text, imgs: names });
+    } catch {
+      MO.busy = false;
+      note('（没发出去，再试一次）', 'err');
+      go.disabled = false; go.textContent = '发表';
+    }
+  };
+  bar.append(add, file, go);
+  w.append(ta, pics, bar);
+  return w;
+}
+function moPost(p) {
+  const who = (w) => w === 'gu' ? '小克' : 'tt';
+  const el = document.createElement('div');
+  el.className = 'mo-post';
+  const main = document.createElement('div');
+  main.className = 'mo-main';
+  const name = document.createElement('div');
+  name.className = 'mo-name'; name.textContent = who(p.by);
+  main.appendChild(name);
+  if (p.text) {
+    const t = document.createElement('div');
+    t.className = 'mo-text'; t.textContent = p.text;
+    main.appendChild(t);
+  }
+  const imgs = p.imgs || [];
+  if (imgs.length) {
+    const g = document.createElement('div');
+    g.className = 'mo-grid' + (imgs.length === 1 ? ' one' : (imgs.length === 2 || imgs.length === 4) ? ' two' : '');
+    imgs.forEach(n => {
+      const im = document.createElement('img');
+      im.loading = 'lazy'; im.alt = ''; im.src = moImg(n, imgs.length > 1);
+      im.onclick = () => moLightbox(n);
+      g.appendChild(im);
+    });
+    main.appendChild(g);
+  }
+  const likes = p.likes || [], comments = p.comments || [];
+  const meta = document.createElement('div');
+  meta.className = 'mo-meta';
+  const when = document.createElement('span'); when.textContent = whenText(p.at);
+  const liked = likes.includes('her');
+  const like = document.createElement('button');
+  like.className = liked ? 'on' : '';
+  like.innerHTML = '<span class="ic">' + ICONS.heartIc + '</span>' + (liked ? '取消' : '赞');
+  like.onclick = () => moAct({ action: 'like', id: p.id });
+  const cm = document.createElement('button');
+  cm.innerHTML = '<span class="ic">' + ICONS.chat + '</span>评论';
+  meta.append(when, like, cm);
+  if (p.by === 'her') {
+    const del = document.createElement('button');
+    del.className = 'del'; del.textContent = '删除';
+    del.onclick = () => { if (confirm('删掉这条朋友圈？')) moAct({ action: 'del', id: p.id }); };
+    meta.appendChild(del);
+  }
+  main.appendChild(meta);
+  if (likes.length || comments.length) {
+    const fb = document.createElement('div');
+    fb.className = 'mo-fb';
+    if (likes.length) {
+      const lk = document.createElement('div');
+      lk.className = 'lk'; lk.textContent = '♥ ' + likes.map(who).join('、');
+      fb.appendChild(lk);
+    }
+    comments.forEach(c => {
+      const row = document.createElement('div');
+      row.className = 'cm';
+      const b = document.createElement('b'); b.textContent = who(c.by) + '：';
+      row.append(b, c.text);
+      if (c.by === 'her') {
+        row.title = '点一下可以删掉';
+        row.onclick = () => { if (confirm('删掉这条评论？')) moAct({ action: 'uncomment', id: p.id, cid: c.id }); };
+      }
+      fb.appendChild(row);
+    });
+    main.appendChild(fb);
+  }
+  const cin = document.createElement('div');
+  cin.className = 'mo-cin'; cin.hidden = true;
+  const ci = document.createElement('input'); ci.placeholder = '评论…'; ci.maxLength = 500;
+  const cs = document.createElement('button'); cs.textContent = '发送';
+  cs.onclick = () => { const v = ci.value.trim(); if (v) moAct({ action: 'comment', id: p.id, text: v }); };
+  ci.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) cs.onclick(); });
+  cin.append(ci, cs);
+  cm.onclick = () => { cin.hidden = !cin.hidden; if (!cin.hidden) ci.focus(); };
+  main.appendChild(cin);
+  el.append(moAvatar(p.by), main);
+  return el;
+}
+document.getElementById('navMoments').onclick = () => {
+  closeDrawer(); sheets.moments.classList.add('open'); loadMoments();
+};
+
+/* ---------- 一起听 ----------
+   网易云的歌。搜歌、查封面都是后端去问网易云（server/xiaojia.py）；网页里放不了（版权挡着），
+   点「听」就唤起手机上的网易云 App——同时右下角的小螃蟹戴上耳机，陪你听完这一首。
+   小克推的歌，是她在聊天里用连接器先搜到、再放进歌单的，编号不会是编的。 */
+const LS = { q: '', found: [], tick: 0 };
+function lsAgo(at) {
+  const m = Math.floor((Date.now() / 1000 - at) / 60);
+  return m < 1 ? '刚刚' : m < 60 ? m + ' 分钟前' : m < 1440 ? Math.floor(m / 60) + ' 小时前' : whenText(at);
+}
+function lsTime(sec) { return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0'); }
+function lsListen(song) {
+  fetch('api/listen', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: 'now', id: song.id }) }).catch(() => {});
+  petSet('music', Math.min(song.sec || 240, 600) * 1000);      // 陪你听完这一首（最长十分钟）
+  openSong(song.id);
+  setTimeout(loadListen, 1500);
+}
+function lsCover(src) {
+  const im = document.createElement('img');
+  im.loading = 'lazy'; im.alt = '';
+  if (src) im.src = src + '?param=160y160';
+  return im;
+}
+async function lsAct(payload) {
+  try {
+    const d = await (await fetch('api/listen', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload) })).json();
+    if (!d.ok) note('（' + (d.msg || '没成') + '）', 'err');
+    return d;
+  } catch { note('（没成，再试一次）', 'err'); return { ok: false }; }
+}
+function lsRow(song, opts) {
+  const r = document.createElement('div');
+  r.className = 'ls-row';
+  const t = document.createElement('div');
+  t.className = 'rt';
+  const n = document.createElement('div'); n.className = 'rn'; n.textContent = song.name;
+  const a = document.createElement('div'); a.className = 'ra';
+  a.textContent = song.artist + (song.sec ? ' · ' + lsTime(song.sec) : '');
+  t.append(n, a);
+  if (opts.by) {
+    const b = document.createElement('div');
+    b.className = 'rby'; b.textContent = (song.by === 'gu' ? '姐姐推给你' : '你分享的') + ' · ' + whenText(song.at);
+    t.appendChild(b);
+  }
+  if (song.note) {
+    const nt = document.createElement('div'); nt.className = 'rnote'; nt.textContent = song.note;
+    t.appendChild(nt);
+  }
+  r.append(lsCover(song.pic), t);
+  (opts.buttons || []).forEach(([label, fn, primary]) => {
+    const b = document.createElement('button');
+    b.className = 'rb' + (primary ? ' p' : ''); b.textContent = label;
+    b.onclick = (e) => { e.stopPropagation(); fn(r); };
+    r.appendChild(b);
+  });
+  return r;
+}
+function lsShareForm(row, song, d) {
+  row.querySelectorAll('.rb').forEach(b => b.remove());
+  const f = document.createElement('div');
+  f.className = 'ls-say';
+  const inp = document.createElement('input'); inp.placeholder = '想跟姐姐说一句…（可以不写）'; inp.maxLength = 200;
+  const go = document.createElement('button'); go.textContent = '分享';
+  go.onclick = async () => {
+    go.disabled = true;
+    const r = await lsAct({ action: 'share', id: song.id, note: inp.value.trim() });
+    if (r.ok) { LS.q = ''; LS.found = []; renderListen(r); note('（放进我们的歌单了）'); }
+    else go.disabled = false;
+  };
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) go.onclick(); });
+  f.append(inp, go);
+  row.querySelector('.rt').appendChild(f);
+  inp.focus();
+}
+/* 唱片机：歌在网易云 App 里放，这边看不到真进度——从点「听」那一刻算起，最多走到这首歌的长度 */
+function lsDeck(d, songs) {
+  const deck = document.createElement('div');
+  deck.className = 'ls-deck';
+  for (let i = 0; i < 16; i++) {
+    const st = document.createElement('i');
+    st.className = 'st';
+    st.style.left = (Math.random() * 100) + '%'; st.style.top = (Math.random() * 100) + '%';
+    st.style.animationDelay = (-Math.random() * 3.4) + 's';
+    deck.appendChild(st);
+  }
+  const off = (d.server_now || Date.now() / 1000) - Date.now() / 1000;      // 手机钟跟服务器差多少
+  const cur = d.now;
+  const pair = document.createElement('div');
+  pair.className = 'ls-pair';
+  pair.innerHTML = '<div class="av">tt</div><div class="av"><img src="pet/clawd-music.svg" alt=""></div>'
+    + '<span class="hrt">' + S('<path d="M12 21s-7.5-4.6-9.6-9.1C.9 8.6 3 5 6.4 5c2 0 3.6 1.2 4.6 2.8l1 1.4 1-1.4C14 6.2 15.6 5 17.6 5 21 5 23.1 8.6 21.6 11.9 19.5 16.4 12 21 12 21z" fill="currentColor"/>') + '</span>';
+  const withEl = document.createElement('div');
+  withEl.className = 'ls-with';
+  const turn = document.createElement('div');
+  turn.className = 'ls-turn';
+  const vinyl = document.createElement('div');
+  vinyl.className = 'ls-vinyl';
+  if (cur && cur.pic) vinyl.appendChild(lsCover(cur.pic));
+  else { const b = document.createElement('div'); b.className = 'blank'; vinyl.appendChild(b); }
+  const arm = document.createElement('div');
+  arm.className = 'ls-arm';
+  arm.innerHTML = '<svg viewBox="0 0 40 80"><circle cx="33" cy="6" r="5.5" fill="#cfd8e2"/><circle cx="33" cy="6" r="2.2" fill="#1f2a37"/>'
+    + '<path d="M33 6 L30 58 L20 72" fill="none" stroke="#cfd8e2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'
+    + '<rect x="14" y="68" width="10" height="7" rx="1.5" transform="rotate(35 19 71.5)" fill="#eef2f6"/></svg>';
+  turn.append(vinyl, arm);
+  const title = document.createElement('div'); title.className = 'ls-title';
+  const artist = document.createElement('div'); artist.className = 'ls-artist';
+  const prog = document.createElement('div');
+  prog.className = 'ls-prog';
+  prog.innerHTML = '<span class="a">0:00</span><span class="bar"><i></i></span><span class="b">0:00</span>';
+  const ctl = document.createElement('div');
+  ctl.className = 'ls-ctl';
+  deck.append(pair, withEl, turn, title, artist);
+  if (cur) {
+    title.textContent = cur.name;
+    artist.textContent = cur.artist;
+    const shared = songs.some(x => x.id === cur.id);
+    const mk = (icon, label, fn, cls) => {
+      const b = document.createElement('button');
+      b.title = label; if (cls) b.className = cls;
+      b.innerHTML = '<span class="ic">' + icon + '</span>';
+      b.onclick = fn;
+      return b;
+    };
+    ctl.append(
+      mk(ICONS.heartIc, shared ? '已经在我们的歌单里了' : '分享给姐姐', async () => {
+        if (shared) return note('（这首已经在我们的歌单里了）');
+        const r = await lsAct({ action: 'share', id: cur.id, note: '' });
+        if (r.ok) { renderListen(r); note('（放进我们的歌单了）'); }
+      }, shared ? 'on' : ''),
+      mk(ICONS.headphones, '在网易云里听', () => lsListen(cur), 'big'),
+      mk(S('<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1" fill="currentColor"/><circle cx="3.5" cy="12" r="1" fill="currentColor"/><circle cx="3.5" cy="18" r="1" fill="currentColor"/>'),
+        '我们的歌单', () => { const h = document.getElementById('lsList'); if (h) h.scrollIntoView({ behavior: 'smooth' }); }));
+    deck.append(prog, ctl);
+  } else {
+    title.textContent = '还没开始听';
+    artist.textContent = '搜一首歌，点「听」，唱片就转起来';
+  }
+  /* 每秒走一下：唱片转不转、唱臂放没放下、进度条、一起听了多久 */
+  const fmt = (t) => Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+  const tick = () => {
+    if (!deck.isConnected) { clearInterval(LS.tick); return; }
+    if (!sheets.listen.classList.contains('open')) return;       // 页面关着就不走了，省电
+    const t = Date.now() / 1000 + off;
+    const el = cur ? Math.max(0, t - cur.at) : 0;
+    const len = cur ? (cur.sec || 0) : 0;
+    const on = !!cur && el < len;
+    vinyl.classList.toggle('on', on);
+    arm.classList.toggle('on', on);
+    if (cur) {
+      prog.querySelector('.a').textContent = fmt(Math.min(el, len));
+      prog.querySelector('.b').textContent = fmt(len);
+      prog.querySelector('i').style.width = (len ? Math.min(100, el / len * 100) : 0) + '%';
+    }
+    const tog = (d.together || 0) - (cur ? Math.min((d.server_now || t) - cur.at, len) : 0) + Math.min(el, len);
+    const h = Math.floor(tog / 3600), m = Math.floor(tog % 3600 / 60);
+    withEl.innerHTML = tog < 60 ? (on ? '姐姐就在你身边，一起听的第一首' : '姐姐在这儿，等你放一首歌')
+      : '姐姐就在你身边，一起听了 <b>' + (h ? h + '</b> 小时 <b>' : '') + m + '</b> 分钟';
+  };
+  clearInterval(LS.tick);
+  LS.tick = setInterval(tick, 1000);
+  requestAnimationFrame(tick);        // 等唱片机先摆上页面再走第一下，不然会以为页面没了、把计时停掉
+  return deck;
+}
+
+async function loadListen() {
+  const body = document.getElementById('listenBody');
+  if (!body.firstChild) body.innerHTML = '<div class="sh-head"><h1>一起听</h1><div class="sub">翻歌单中…</div></div>';
+  let d = null;
+  try { d = await (await fetch('api/listen', { cache: 'no-store' })).json(); } catch {}
+  if (!d || !d.ok) {
+    body.innerHTML = '<div class="sh-head"><h1>一起听</h1></div><div class="gnote">歌单没拿到，等会儿再看</div>';
+    return;
+  }
+  renderListen(d);
+}
+function renderListen(d) {
+  const body = document.getElementById('listenBody');
+  const songs = d.songs || [];
+  body.innerHTML = '';
+  const head = document.createElement('div');
+  head.className = 'sh-head';
+  head.innerHTML = '<h1>一起听</h1><div class="sub"></div>';
+  head.querySelector('.sub').textContent = '我们的歌单 · ' + songs.length + ' 首';
+  body.appendChild(head);
+
+  body.appendChild(lsDeck(d, songs));
+
+  const sb = document.createElement('div');
+  sb.className = 'ls-search';
+  const inp = document.createElement('input');
+  inp.type = 'search'; inp.placeholder = '搜一首歌，比如 绝对占有相对自由'; inp.value = LS.q; inp.enterKeyHint = 'search';
+  const go = document.createElement('button'); go.textContent = '搜';
+  const run = async () => {
+    const q = inp.value.trim();
+    if (!q) return;
+    LS.q = q; go.disabled = true;
+    try {
+      const r = await (await fetch('api/music/search?q=' + encodeURIComponent(q))).json();
+      LS.found = r.items || [];
+      if (r.ok === false) note('（网易云没应声，再试一次）', 'err');
+    } catch { LS.found = []; }
+    renderListen(d);
+  };
+  go.onclick = run;
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); run(); } });
+  sb.append(inp, go);
+  body.appendChild(sb);
+  if (LS.q) {
+    const res = document.createElement('div');
+    res.className = 'hl-card';
+    if (!LS.found.length) res.innerHTML = '<div class="ls-row"><div class="rt"><div class="ra">没搜到，换个写法试试</div></div></div>';
+    LS.found.forEach(x => res.appendChild(lsRow(x, { buttons: [
+      ['听', () => lsListen(x), true],
+      ['分享', (row) => lsShareForm(row, x, d)],
+    ] })));
+    body.appendChild(res);
+  }
+
+  const listHead = wxSect('我们的歌单');
+  listHead.id = 'lsList';
+  body.appendChild(listHead);
+  const list = document.createElement('div');
+  list.className = 'hl-card';
+  if (!songs.length) list.innerHTML = '<div class="ls-row"><div class="rt"><div class="ra">还空着。你分享的、姐姐推给你的歌都会在这里。</div></div></div>';
+  songs.forEach(x => {
+    const btns = [['听', () => lsListen(x), true]];
+    if (x.by === 'her') btns.push(['×', async () => {
+      if (confirm('从歌单里拿掉这首？')) { const r = await lsAct({ action: 'del', eid: x.eid }); if (r.ok) renderListen(r); }
+    }]);
+    list.appendChild(lsRow(x, { by: true, buttons: btns }));
+  });
+  body.appendChild(list);
+  const tip = document.createElement('div');
+  tip.className = 'hl-tip';
+  tip.textContent = '点「听」会打开手机上的网易云 · 姐姐推的歌是她在聊天里搜到再放进来的';
+  body.appendChild(tip);
+}
+document.getElementById('navListen').onclick = () => {
+  closeDrawer(); sheets.listen.classList.add('open'); loadListen();
+};
+
 /* ---------- 小游戏合集 ----------
    一张卡一个游戏。soon 的是还要等后端的：比如你画我猜，得小克真能看图才猜得了。 */
 const GAMES = [
@@ -7335,7 +7959,8 @@ document.addEventListener('touchend', (e) => {
 (() => {
   const NAV = { todo: 'navTodo', cal: 'navCal', wall: 'navWall', news: 'navNews',
                 nook: 'navNook',
-                health: 'navHealth', repo: 'navRepo', weather: 'navWeather', game: 'navGame' };
+                health: 'navHealth', repo: 'navRepo', weather: 'navWeather', game: 'navGame',
+                moments: 'navMoments', listen: 'navListen' };
   let re = '';
   try { re = sessionStorage.getItem('reopenSheet') || ''; sessionStorage.removeItem('reopenSheet'); }
   catch (e) {}

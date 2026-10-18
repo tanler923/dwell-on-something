@@ -227,6 +227,27 @@ STATES['clawd-react-double-jump.svg'] = ('戳一下', '''
     + sparkle(-3, 3.6, '0s') + sparkle(17, 1.8, '-.05s'))
 
 
+# 听歌：戴上大耳机跟着摇，眯着眼，小鸡坐在头梁上一起点头，旁边飘音符（跟桌面图标是同一个样子）
+HEADPHONES = ('<path d="M2.2 9.2 A5.3 5.3 0 0 1 12.8 9.2" fill="none" stroke="#262b31" stroke-width=".9" stroke-linecap="round"/>'
+              '<rect x=".6" y="7.4" width="2.4" height="3.8" rx="1.2" fill="#262b31"/>'
+              '<rect x="12" y="7.4" width="2.4" height="3.8" rx="1.2" fill="#262b31"/>')
+STATES['clawd-music.svg'] = ('听歌', """
+.bd{animation:sway 1.2s infinite ease-in-out}
+.sh{animation:shd .6s infinite ease-in-out}
+.ck{animation:nod .6s infinite alternate ease-in-out}
+.nt{opacity:0;transform-box:fill-box;transform-origin:center;animation:nt 2.4s var(--d,0s) infinite ease-out}
+@keyframes sway{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg)}}
+@keyframes nod{from{transform:rotate(-8deg)}to{transform:rotate(8deg)}}
+@keyframes nt{0%{opacity:0;transform:translate(0,0) scale(.7)}20%{opacity:1}100%{opacity:0;transform:translate(var(--tx,-2px),-7px) scale(1.1)}}
+""", SHADOW + crab(HEADPHONES + '<g fill="#000"><rect x="3.6" y="8.9" width="2" height=".6" rx=".3"/>'
+                    '<rect x="9.4" y="8.9" width="2" height=".6" rx=".3"/></g>'
+                    '<g fill="#f4a7a0" opacity=".9"><ellipse cx="4.6" cy="10.7" rx=".8" ry=".45"/>'
+                    '<ellipse cx="10.4" cy="10.7" rx=".8" ry=".45"/></g>')
+    + '<g fill="#8fa8d6" font-family="sans-serif" font-weight="bold">'
+      '<text class="nt" style="--d:0s;--tx:-2px" x="-3.6" y="5.5" font-size="3.6">♪</text>'
+      '<text class="nt" style="--d:-1.2s;--tx:2px" x="15.2" y="4" font-size="3.6">♫</text></g>')
+
+
 # ---------- 拼起来 ----------
 
 def build(css, parts, color):

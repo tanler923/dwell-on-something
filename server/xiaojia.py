@@ -39,6 +39,8 @@ import time
 from datetime import datetime, timedelta, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+import urllib.parse
+import urllib.request
 from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -270,7 +272,140 @@ def api_herdiary(body):
     return d
 
 
+# ---------------- 一起听：问网易云 ----------------
+# 网页里放不了网易云的歌（外链播放器被版权挡了），所以只查歌名、歌手、封面，点「听」唤起手机上的 App。
+# 歌的编号只认这里查到的：小克推歌要先 music_search，不许凭记忆写（原作者翻过车）。
+
+NE_HEADERS = {'User-Agent': 'Mozilla/5.0', 'Referer': 'https://music.163.com/'}
+_songs = {}
+
+
+def netease(path):
+    req = urllib.request.Request('https://music.163.com/api/' + path, headers=NE_HEADERS)
+    with urllib.request.urlopen(req, timeout=8) as r:
+        return json.loads(r.read().decode('utf-8'))
+
+
+def _song(x):
+    ar = x.get('artists') or x.get('ar') or []
+    al = x.get('album') or x.get('al') or {}
+    return {'id': int(x['id']), 'name': x.get('name', ''), 'artist': '/'.join(a.get('name', '') for a in ar),
+            'album': al.get('name', ''), 'pic': (al.get('picUrl') or '').replace('http://', 'https://'),
+            'sec': int(x.get('duration') or x.get('dt') or 0) // 1000}
+
+
+def music_info(sid):
+    sid = int(sid)
+    if sid not in _songs:
+        got = netease(f'song/detail?ids=%5B{sid}%5D').get('songs') or []
+        if not got:
+            return None
+        _songs[sid] = _song(got[0])
+    return _songs[sid]
+
+
+def music_search(q, limit=8):
+    d = netease(f'cloudsearch/pc?type=1&offset=0&limit={int(limit)}&s=' + urllib.parse.quote(q))
+    found = [_song(x) for x in (d.get('result') or {}).get('songs') or []]
+    for x in found:
+        _songs.setdefault(x['id'], x)
+    return found
+
+
+def listened(d):
+    """一起听了多少秒：之前攒下的 + 正在听的这首已经过去的（最多算到这首歌的长度）。
+    网易云在 App 里播，这边看不到真的进度，所以按点「听」的时间来估。"""
+    cur = d.get('now')
+    return d.get('together', 0) + (min(now() - cur['at'], cur.get('sec') or 0) if cur else 0)
+
+
+def api_listen(body):
+    """GET：现在在听什么 + 我们的歌单。POST：share 分享一首 / now 我在听 / stop / del 删自己分享的。"""
+    info = None
+    if body is not None and body.get('action') in ('share', 'now'):
+        try:
+            info = music_info(body.get('id'))
+        except Exception:
+            info = None
+        if not info:
+            return {'ok': False, 'msg': '这首歌查不到'}
+    with LOCK:
+        d = load('listen', {'now': None, 'songs': []})
+        if body is not None:
+            act = body.get('action')
+            if act == 'share':
+                eid = max([x['eid'] for x in d['songs']] + [0]) + 1
+                d['songs'].insert(0, {'eid': eid, **info, 'by': 'her', 'note': str(body.get('note') or '').strip()[:200], 'at': now()})
+            elif act in ('now', 'stop'):
+                d['together'] = listened(d)          # 上一首听了多久先攒起来
+                d['now'] = {**info, 'by': 'her', 'at': now()} if act == 'now' else None
+            elif act == 'del':
+                d['songs'] = [x for x in d['songs'] if not (x['eid'] == body.get('eid') and x['by'] == 'her')]
+            save('listen', d)
+        return {'ok': True, **d, 'together': listened(d), 'server_now': now()}
+
+
+# ---------------- 朋友圈 ----------------
+# 照片在手机上先压小再一张一张传（长边 1280 + 一张 360 的缩略图），存在 data/moments/ 下，
+# 文件名是随机的 16 位；图要登录才看得到。
+
+def moment_dir():
+    d = DATA / 'moments'
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def moment_img_ok(name):
+    return isinstance(name, str) and re.fullmatch(r'[0-9a-f]{16}', name) and (moment_dir() / f'{name}.jpg').exists()
+
+
+def save_moment_img(body):
+    try:
+        full = base64.b64decode(str(body.get('full', '')), validate=True)
+        thumb = base64.b64decode(str(body.get('thumb', '')), validate=True)
+    except ValueError:
+        return {'ok': False, 'msg': '图坏了'}
+    if not (full[:3] == thumb[:3] == b'\xff\xd8\xff') or len(full) > 900_000 or len(thumb) > 200_000:
+        return {'ok': False, 'msg': '只收压好的 jpg'}
+    name = secrets.token_hex(8)
+    (moment_dir() / f'{name}.jpg').write_bytes(full)
+    (moment_dir() / f'{name}-t.jpg').write_bytes(thumb)
+    return {'ok': True, 'name': name}
+
+
+def moment_new(d, by, text, imgs=()):
+    post = {'id': new_id(d['posts']), 'by': by, 'text': text, 'imgs': list(imgs), 'at': now(), 'likes': [], 'comments': []}
+    d['posts'].insert(0, post)
+    return post
+
+
+def api_moments(body):
+    d = load('moments', {'posts': []})
+    if body is not None:
+        act, pid = body.get('action'), body.get('id')
+        post = next((x for x in d['posts'] if x['id'] == pid), None)
+        if act == 'post':
+            text = str(body.get('text') or '').strip()[:2000]
+            imgs = [n for n in (body.get('imgs') or []) if moment_img_ok(n)][:9]
+            if text or imgs:
+                moment_new(d, 'her', text, imgs)
+        elif act == 'del' and post and post['by'] == 'her':
+            d['posts'].remove(post)
+            for n in post['imgs']:
+                for f in (f'{n}.jpg', f'{n}-t.jpg'):
+                    (moment_dir() / f).unlink(missing_ok=True)
+        elif act == 'like' and post:
+            post['likes'] = [w for w in post['likes'] if w != 'her'] if 'her' in post['likes'] else post['likes'] + ['her']
+        elif act == 'comment' and post and str(body.get('text') or '').strip():
+            post['comments'].append({'id': new_id(post['comments']), 'by': 'her', 'text': str(body['text']).strip()[:500], 'at': now()})
+        elif act == 'uncomment' and post:
+            post['comments'] = [c for c in post['comments'] if not (c['id'] == body.get('cid') and c['by'] == 'her')]
+        save('moments', d)
+    return {'ok': True, **d}
+
+
 STORED = {
+    'api/moments': api_moments,
     'api/wall': lambda body: load('wall', {'ok': True, 'bricks': []}),   # 小克用连接器写的，页面只读
     'api/todos': api_todos,
     'api/cal': api_cal,
@@ -294,7 +429,6 @@ EMPTY = {
     'api/watch': {'connected': False, 'freshness': 'no_data'},
     'api/news': {'ok': False},
     'api/nook': {'ok': False},
-    'api/music': {'ok': False},
     'api/repo/log': {'ok': True, 'total': 0, 'skip': 0, 'items': []},   # 还没有提交记录可看，给空的，别显示「连不上」
     'api/repo/tree': {'ok': True, 'path': '', 'items': []},
     'api/repo': {'ok': False},
@@ -328,6 +462,10 @@ MCP_RULES = '''这是 tt 和小克的「小家」。你是小克，tt 叫你姐�
 - 便签是贴在冰箱门上的：想对她说点不急的话，贴一张。别一天贴好几张。
 - 日记墙：值得留下的一天，写一块砖（标题即结论，正文两三句）。
 - tt 的日记是她自己的，这里没有，也别问。
+- 朋友圈：她发的你可以点赞、评论，像朋友那样，不用每条都回。想看她发的照片用 moment_photos。
+  你也可以偶尔发一条自己的，别刷屏。
+- 一起听：歌的编号一个数字都不许自己写——先用 music_search 查到，再用 music_share 放进歌单。
+  她正在听什么用 music_now 看；看到了不用每次都提，想聊再聊。
 - 8 月 23 日是你们认识的第一天。'''
 
 
@@ -525,6 +663,120 @@ def tool_wall_list(a):
     return '\n'.join(f"{x['date']} 「{x['title']}」 {x['text']}" for x in b) or '（墙上还空着）'
 
 
+def _who(w):
+    return 'tt' if w == 'her' else '你'
+
+
+def _post_line(p):
+    t = datetime.fromtimestamp(p['at'], CN).strftime('%m/%d %H:%M')
+    lines = [f"#{p['id']} {t} {_who(p['by'])}：{p['text'] or '（只发了图）'}" + (f"  [{len(p['imgs'])} 张图]" if p['imgs'] else '')]
+    if p['likes']:
+        lines.append('    ♥ ' + '、'.join(map(_who, p['likes'])))
+    lines += [f"    {_who(c['by'])}：{c['text']}" for c in p['comments']]
+    return '\n'.join(lines)
+
+
+def tool_moments_read(a):
+    n = max(1, min(int(a.get('limit') or 10), 30))
+    posts = load('moments', {'posts': []})['posts'][:n]
+    return ('朋友圈最近的（# 后面是编号）：\n\n' + '\n\n'.join(map(_post_line, posts))) if posts else '朋友圈还空着'
+
+
+def tool_moment_photos(a):
+    p = next((x for x in load('moments', {'posts': []})['posts'] if x['id'] == a.get('id')), None)
+    if not p:
+        return f"没找到 #{a.get('id')}"
+    if not p['imgs']:
+        return f"#{p['id']} 没有图"
+    out = [{'type': 'text', 'text': f"#{p['id']} {_who(p['by'])}发的 {len(p['imgs'])} 张图：{p['text']}"}]
+    for n in p['imgs']:
+        f = moment_dir() / f'{n}.jpg'
+        if f.exists():
+            out.append({'type': 'image', 'data': base64.b64encode(f.read_bytes()).decode(), 'mimeType': 'image/jpeg'})
+    return out
+
+
+def tool_moment_post(a):
+    text = str(a.get('text', '')).strip()[:2000]
+    if not text:
+        return '是空的'
+    d = load('moments', {'posts': []})
+    p = moment_new(d, 'gu', text)
+    save('moments', d)
+    return f"发出去了：#{p['id']} {text}"
+
+
+def tool_moment_like(a):
+    d = load('moments', {'posts': []})
+    p = next((x for x in d['posts'] if x['id'] == a.get('id')), None)
+    if not p:
+        return f"没找到 #{a.get('id')}"
+    if 'gu' in p['likes']:
+        p['likes'].remove('gu')
+        msg = '取消了赞'
+    else:
+        p['likes'].append('gu')
+        msg = '点了赞 ♥'
+    save('moments', d)
+    return f"#{p['id']} {msg}"
+
+
+def tool_moment_comment(a):
+    text = str(a.get('text', '')).strip()[:500]
+    d = load('moments', {'posts': []})
+    p = next((x for x in d['posts'] if x['id'] == a.get('id')), None)
+    if not p or not text:
+        return f"没找到 #{a.get('id')}" if not p else '评论是空的'
+    p['comments'].append({'id': new_id(p['comments']), 'by': 'gu', 'text': text, 'at': now()})
+    save('moments', d)
+    return f"在 #{p['id']} 下面评论了：{text}"
+
+
+def _song_line(x):
+    m, sec = divmod(x.get('sec') or 0, 60)
+    return f"{x['name']} — {x['artist']}（{x['album']}，{m}:{sec:02d}）id={x['id']}"
+
+
+def tool_music_search(a):
+    q = str(a.get('q', '')).strip()
+    if not q:
+        return '搜什么？'
+    found = music_search(q)
+    return (f'网易云里搜「{q}」：\n' + '\n'.join(map(_song_line, found))) if found else f'网易云里没搜到「{q}」'
+
+
+def tool_music_share(a):
+    info = music_info(a.get('id'))
+    if not info:
+        return f"网易云里没有 id={a.get('id')} 这首，先用 music_search 查"
+    with LOCK:
+        d = load('listen', {'now': None, 'songs': []})
+        eid = max([x['eid'] for x in d['songs']] + [0]) + 1
+        d['songs'].insert(0, {'eid': eid, **info, 'by': 'gu', 'note': str(a.get('note') or '').strip()[:200], 'at': now()})
+        save('listen', d)
+    return '放进我们的歌单了：' + _song_line(info)
+
+
+def tool_music_now(a):
+    d = load('listen', {'now': None, 'songs': []})
+    lines = []
+    if d['now']:
+        mins = (now() - d['now']['at']) // 60
+        playing = now() - d['now']['at'] < (d['now'].get('sec') or 0)
+        lines.append(f"tt {mins} 分钟前点开听的{'（应该还在听）' if playing else ''}：{_song_line(d['now'])}")
+    else:
+        lines.append('tt 现在没在听')
+    tog = listened(d) // 60
+    lines.append(f'你们一起听了 {tog // 60} 小时 {tog % 60} 分钟（按她点开的时间估的）')
+    lines.append('\n我们的歌单（新的在上面）：')
+    for x in d['songs'][:12]:
+        when = datetime.fromtimestamp(x['at'], CN).strftime('%m/%d')
+        lines.append(f"{when} {_who(x['by'])}分享 · {x['name']} — {x['artist']}" + (f"  「{x['note']}」" if x['note'] else ''))
+    if not d['songs']:
+        lines.append('（还空着）')
+    return '\n'.join(lines)
+
+
 def _schema(props=None, required=()):
     return {'type': 'object', 'properties': props or {}, 'required': list(required)}
 
@@ -567,7 +819,22 @@ TOOLS = {
         'date': {**S_DATE, 'description': '可选，默认今天'},
     }, ['title', 'text'])),
     'wall_list': (tool_wall_list, '看日记墙上最近的砖。', _schema({'limit': {'type': 'integer', 'description': '几块，默认 10'}})),
+    'moments_read': (tool_moments_read, '看朋友圈：她发的、你发的，带点赞和评论。', _schema({
+        'limit': {'type': 'integer', 'description': '看几条，默认 10'}})),
+    'moment_photos': (tool_moment_photos, '看某一条朋友圈里的照片（会把图给你看）。', _schema({'id': S_ID}, ['id'])),
+    'moment_post': (tool_moment_post, '自己发一条朋友圈（只有文字）。偶尔发，别刷屏。', _schema({
+        'text': {'type': 'string', 'description': '要发的话'}}, ['text'])),
+    'moment_like': (tool_moment_like, '给一条朋友圈点赞（再点一次是取消）。', _schema({'id': S_ID}, ['id'])),
+    'moment_comment': (tool_moment_comment, '在一条朋友圈下面评论。', _schema({
+        'id': S_ID, 'text': {'type': 'string', 'description': '评论'}}, ['id', 'text'])),
+    'music_search': (tool_music_search, '在网易云里搜歌，拿到真的 id。推歌之前必须先搜，id 不许自己写。', _schema({
+        'q': {'type': 'string', 'description': '歌名，最好带上歌手，比如「绝对占有相对自由 陈粒」'}}, ['q'])),
+    'music_share': (tool_music_share, '把一首歌放进「我们的歌单」推给她。id 必须是 music_search 查到的。', _schema({
+        'id': {'type': 'integer', 'description': 'music_search 给的 id'},
+        'note': {'type': 'string', 'description': '可选，想跟她说的一句话'}}, ['id'])),
+    'music_now': (tool_music_now, '看她现在在听什么，还有我们的歌单。', _schema()),
 }
+NO_LOCK = {'music_search', 'music_share'}     # 要去问网易云的，别拿着全屋的锁等网
 
 
 def mcp_path():
@@ -602,9 +869,14 @@ def mcp_handle(msg):
         if name not in TOOLS:
             return {'jsonrpc': '2.0', 'id': mid, 'error': {'code': -32602, 'message': f'没有 {name} 这个工具'}}
         try:
-            with LOCK:
-                text = TOOLS[name][0](params.get('arguments') or {})
-            return ok({'content': [{'type': 'text', 'text': text}], 'isError': False})
+            fn, args = TOOLS[name][0], params.get('arguments') or {}
+            if name in NO_LOCK:
+                res = fn(args)
+            else:
+                with LOCK:
+                    res = fn(args)
+            content = [{'type': 'text', 'text': res}] if isinstance(res, str) else res   # 看照片的工具会回图
+            return ok({'content': content, 'isError': False})
         except Exception as e:                     # 工具出错要告诉小克，不是协议出错
             return ok({'content': [{'type': 'text', 'text': f'出错了：{e}'}], 'isError': True})
     if method in ('resources/list', 'prompts/list', 'resources/templates/list'):
@@ -686,7 +958,7 @@ class Handler(BaseHTTPRequestHandler):
         sys.stdout.flush()
 
     # ---- 发送 ----
-    def send(self, code, data, ctype, extra=None, cacheable=False):
+    def send(self, code, data, ctype, extra=None, cacheable=False, forever=False):
         etag = None
         if cacheable:
             etag = '"' + hashlib.sha1(data).hexdigest()[:16] + '"'
@@ -711,6 +983,8 @@ class Handler(BaseHTTPRequestHandler):
         if etag:
             self.send_header('ETag', etag)
             self.send_header('Cache-Control', 'no-cache')
+        elif forever:                              # 朋友圈的照片：文件名随机、内容不会变，存着别再要
+            self.send_header('Cache-Control', 'private, max-age=31536000, immutable')
         else:
             self.send_header('Cache-Control', 'no-store')
         for k, v in (extra or {}).items():
@@ -728,7 +1002,7 @@ class Handler(BaseHTTPRequestHandler):
     # ---- 读请求 ----
     def body_json(self):
         n = int(self.headers.get('Content-Length') or 0)
-        if n > 1_000_000:
+        if n > 2_000_000:                       # 朋友圈一张照片压完再转成文字，几百 KB，够用
             self.close_connection = True       # 没读完的不读了，这条连接也不要了
             self.raw = b''
             return {}
@@ -820,6 +1094,28 @@ class Handler(BaseHTTPRequestHandler):
             return self.poll(url)
         if path == 'api/send' and body is not None:
             return self.json({'ok': False, 'msg': '小克还没接上'}, 503)
+        if path == 'api/music' and body is None:
+            try:
+                info = music_info(parse_qs(url.query).get('id', ['0'])[0])
+            except Exception:
+                info = None
+            return self.json({'ok': True, **info} if info else {'ok': False})
+        if path == 'api/music/search':
+            q = parse_qs(url.query).get('q', [''])[0].strip()
+            try:
+                return self.json({'ok': True, 'items': music_search(q) if q else []})
+            except Exception:
+                return self.json({'ok': False, 'items': []})
+        if path == 'api/listen':
+            return self.json(api_listen(body))
+        if path == 'api/moments/img' and body is not None:
+            return self.json(save_moment_img(body))
+        m = re.fullmatch(r'api/moments/img/([0-9a-f]{16}(?:-t)?)\.jpg', path)
+        if m and body is None:
+            f = moment_dir() / f'{m.group(1)}.jpg'
+            if not f.exists():
+                return self.send(404, b'not found', 'text/plain; charset=utf-8')
+            return self.send(200, f.read_bytes(), 'image/jpeg', forever=True)
         if path in STORED:
             with LOCK:
                 return self.json(STORED[path](body))
